@@ -13,6 +13,7 @@ static const void *CLLocationManagerUpdateKey = &CLLocationManagerUpdateKey;
 static const void *CLLocationManagerUpdateAccuracyKey = &CLLocationManagerUpdateAccuracyKey;
 
 CLUpdateAccuracyFilter const kCLUpdateAccuracyFilterNone = 0.0;
+CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
 
 
 @interface CLLocationManagerBlocks ()
@@ -70,9 +71,7 @@ CLUpdateAccuracyFilter const kCLUpdateAccuracyFilterNone = 0.0;
         
         // Location accuracy filtering
         if (self.updateAccuracyFilter != kCLUpdateAccuracyFilterNone) {
-            
             if (loc.horizontalAccuracy > self.updateAccuracyFilter) {
-                NSLog(@"Inaccurate location");
                 continue;
             }
         }
@@ -81,7 +80,6 @@ CLUpdateAccuracyFilter const kCLUpdateAccuracyFilterNone = 0.0;
         NSDate *eventDate = loc.timestamp;
         NSTimeInterval howRecent = [eventDate timeIntervalSinceNow];
         if (abs(howRecent) > self.updateLocationAgeFilter) {
-            NSLog(@"Old location");
             continue;
         }
         
@@ -89,9 +87,7 @@ CLUpdateAccuracyFilter const kCLUpdateAccuracyFilterNone = 0.0;
         
         LocationManagerUpdateBlock updateBlock = self.updateBlock;
         if (updateBlock) {
-            
             __block BOOL stopUpdates = NO;
-            
             updateBlock(manager, loc, nil, &stopUpdates);
             
             if (stopUpdates) {
@@ -102,11 +98,13 @@ CLUpdateAccuracyFilter const kCLUpdateAccuracyFilterNone = 0.0;
         }
     }
     
-    DidUpdateLocationsBlock didUpdateLocationsBlock = self.didUpdateLocationsBlock;
-    if (didUpdateLocationsBlock) {
-        NSArray *filteredLocations = [NSArray arrayWithArray:filteredLocationsMutable];
-        
-        didUpdateLocationsBlock(manager, filteredLocations);
+    
+    if ([filteredLocationsMutable count]) {
+        DidUpdateLocationsBlock didUpdateLocationsBlock = self.didUpdateLocationsBlock;
+        if (didUpdateLocationsBlock) {
+            NSArray *filteredLocations = [NSArray arrayWithArray:filteredLocationsMutable];
+            didUpdateLocationsBlock(manager, filteredLocations);
+        }
     }
 }
 
