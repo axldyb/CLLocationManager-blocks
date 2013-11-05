@@ -21,22 +21,14 @@
 {
     [super viewDidLoad];
     
-	self.manager = [[CLLocationManager alloc] init];
-    
-    [self.manager didChangeAuthorizationStatusWithBlock:^(CLLocationManager *manager, CLAuthorizationStatus status) {
-        NSLog(@"Status: %i", status);
-    }];
-    
-    [self.manager didUpdateLocationsWithBlock:^(CLLocationManager *manager, NSArray *locations) {
-        NSLog(@"Regular: %@", locations);
-    }];
+	self.manager = [[CLLocationManager alloc] init];    
+    self.manager.updateAccuracyFilter = 50.0;
+    self.manager.updateLocationAgeFilter = 15.0;
     
     [self.manager startUpdatingLocationWithUpdateBlock:^(CLLocationManager *manager, CLLocation *location, NSError *error, BOOL *stopUpdating) {
-        NSLog(@"Update: %@", location);
+        NSLog(@"Our new location: %@", location);
         *stopUpdating = YES;
-    }];
-    
-    
+    }]; 
 }
 
 @end
