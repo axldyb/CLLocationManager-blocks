@@ -23,13 +23,20 @@
     
 	self.manager = [[CLLocationManager alloc] init];
     
-    [self.manager setDidChangeAuthorizationStatusWithBlock:^(CLLocationManager *manager, CLAuthorizationStatus status) {
+    [self.manager didChangeAuthorizationStatusWithBlock:^(CLLocationManager *manager, CLAuthorizationStatus status) {
         NSLog(@"Status: %i", status);
     }];
     
-    [self.manager startUpdatingLocationWithUpdateBlock:^(CLLocation *location, NSError *error, BOOL stopUpdating) {
-        NSLog(@"Update: %@", location);
+    [self.manager didUpdateLocationsWithBlock:^(CLLocationManager *manager, NSArray *locations) {
+        NSLog(@"Regular: %@", locations);
     }];
+    
+    [self.manager startUpdatingLocationWithUpdateBlock:^(CLLocationManager *manager, CLLocation *location, NSError *error, BOOL *stopUpdating) {
+        NSLog(@"Update: %@", location);
+        *stopUpdating = YES;
+    }];
+    
+    
 }
 
 @end

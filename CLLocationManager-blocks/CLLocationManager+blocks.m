@@ -12,33 +12,45 @@ static const void *CLLocationManagerBlocksDelegateKey = &CLLocationManagerBlocks
 static const void *CLLocationManagerUpdateKey = &CLLocationManagerUpdateKey;
 static const void *CLLocationManagerUpdateAccuracyKey = &CLLocationManagerUpdateAccuracyKey;
 
+CLUpdateAccuracyFilter const kCLUpdateAccuracyFilterNone = 0.0;
+
+
 @interface CLLocationManagerBlocks ()
 
 @property (nonatomic, assign) CLUpdateAccuracyFilter updateAccuracyFilter;
+@property (nonatomic, assign) CLLocationAgeFilter updateLocationAgeFilter;
 
+@property (nonatomic, copy) DidUpdateLocationsBlock didUpdateLocationsBlock;
 @property (nonatomic, copy) LocationManagerUpdateBlock updateBlock;
 @property (nonatomic, copy) DidChangeAuthorizationStatusBlock didChangeAuthorizationStatusBlock;
 @property (nonatomic, copy) DidEnterRegionBlock didEnterRegionBlock;
+@property (nonatomic, copy) DidExitRegionBlock didExitRegionBlock;
+@property (nonatomic, copy) MonitoringDidFailForRegionWithBlock monitoringDidFailForRegionWithBlock;
+@property (nonatomic, copy) DidStartMonitoringForRegionWithBlock didStartMonitoringForRegionWithBlock;
 
 @end
 
 @implementation CLLocationManagerBlocks
 
-#pragma mark - Blocks Implementation
 
-- (void)startUpdatingLocationWithUpdateBlock:(LocationManagerUpdateBlock)updateBlock
+#pragma mark - Getters
+
+- (CLUpdateAccuracyFilter)updateAccuracyFilter
 {
-    self.updateBlock = updateBlock;
+    if (!_updateAccuracyFilter) {
+        _updateAccuracyFilter = kCLUpdateAccuracyFilterNone;
+    }
+    
+    return _updateAccuracyFilter;
 }
 
-- (void)setDidChangeAuthorizationStatusWithBlock:(DidChangeAuthorizationStatusBlock)block
+- (CLLocationAgeFilter)updateLocationAgeFilter
 {
-    self.didChangeAuthorizationStatusBlock = block;
-}
-
-- (void)setDidEnterRegionWithBlock:(DidEnterRegionBlock)block
-{
-    self.didEnterRegionBlock = block;
+    if (!_updateLocationAgeFilter) {
+        _updateLocationAgeFilter = kCLLocationAgeFilterNone;
+    }
+    
+    return _updateLocationAgeFilter;
 }
 
 
@@ -53,16 +65,34 @@ static const void *CLLocationManagerUpdateAccuracyKey = &CLLocationManagerUpdate
 
 - (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations
 {
+    NSMutableArray *filteredLocationsMutable = [NSMutableArray array];
     for ( CLLocation *loc in locations ) {
         
-        // TODO (AD): Do filtering
+        // Location accuracy filtering
+        if (self.updateAccuracyFilter != kCLUpdateAccuracyFilterNone) {
+            
+            if (loc.horizontalAccuracy > self.updateAccuracyFilter) {
+                NSLog(@"Inaccurate location");
+                continue;
+            }
+        }
+        
+        // Location age filtering
+        NSDate *eventDate = loc.timestamp;
+        NSTimeInterval howRecent = [eventDate timeIntervalSinceNow];
+        if (abs(howRecent) > self.updateLocationAgeFilter) {
+            NSLog(@"Old location");
+            continue;
+        }
+        
+        [filteredLocationsMutable addObject:loc];
         
         LocationManagerUpdateBlock updateBlock = self.updateBlock;
         if (updateBlock) {
             
-            BOOL stopUpdates = NO;
+            __block BOOL stopUpdates = NO;
             
-            updateBlock(loc, nil, stopUpdates);
+            updateBlock(manager, loc, nil, &stopUpdates);
             
             if (stopUpdates) {
                 [manager stopUpdatingLocation];
@@ -71,6 +101,13 @@ static const void *CLLocationManagerUpdateAccuracyKey = &CLLocationManagerUpdate
             }
         }
     }
+    
+    DidUpdateLocationsBlock didUpdateLocationsBlock = self.didUpdateLocationsBlock;
+    if (didUpdateLocationsBlock) {
+        NSArray *filteredLocations = [NSArray arrayWithArray:filteredLocationsMutable];
+        
+        didUpdateLocationsBlock(manager, filteredLocations);
+    }
 }
 
 - (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error
@@ -78,7 +115,7 @@ static const void *CLLocationManagerUpdateAccuracyKey = &CLLocationManagerUpdate
     LocationManagerUpdateBlock updateBlock = self.updateBlock;
     
     if (updateBlock) {
-        updateBlock(nil, error, NO);
+        updateBlock(manager, nil, error, NO);
     }
 }
 
@@ -102,19 +139,32 @@ static const void *CLLocationManagerUpdateAccuracyKey = &CLLocationManagerUpdate
 
 - (void)locationManager:(CLLocationManager *)manager didExitRegion:(CLRegion *)region
 {
-	
+	DidExitRegionBlock didExitRegionBlock = self.didExitRegionBlock;
+    if (didExitRegionBlock) {
+        didExitRegionBlock(manager, region);
+    }
 }
 
 - (void)locationManager:(CLLocationManager *)manager monitoringDidFailForRegion:(CLRegion *)region withError:(NSError *)error
 {
-	
+	MonitoringDidFailForRegionWithBlock monitoringDidFailForRegionWithBlock = self.monitoringDidFailForRegionWithBlock;
+    if (monitoringDidFailForRegionWithBlock) {
+        monitoringDidFailForRegionWithBlock(manager, region, error);
+    }
 }
 
 - (void)locationManager:(CLLocationManager *)manager didStartMonitoringForRegion:(CLRegion *)region
 {
-	
+	DidStartMonitoringForRegionWithBlock didStartMonitoringForRegionWithBlock = self.didStartMonitoringForRegionWithBlock;
+    if (didStartMonitoringForRegionWithBlock) {
+        didStartMonitoringForRegionWithBlock(manager, region);
+    }
 }
 
+
+// TODO: (AD) Implement these methods if required.
+
+/*
 - (void)locationManager:(CLLocationManager *)manager didUpdateHeading:(CLHeading *)newHeading
 {
 	
@@ -139,6 +189,7 @@ static const void *CLLocationManagerUpdateAccuracyKey = &CLLocationManagerUpdate
 {
     
 }
+*/
 
 @end
 
@@ -147,35 +198,49 @@ static const void *CLLocationManagerUpdateAccuracyKey = &CLLocationManagerUpdate
 
 #pragma mark - Location Manager Blocks
 
+- (void)didUpdateLocationsWithBlock:(DidUpdateLocationsBlock)block
+{
+    [self setBlocksDelegateIfNotSet];
+    [(CLLocationManagerBlocks *)self.blocksDelegate setDidUpdateLocationsBlock:block];
+}
+
+- (void)didChangeAuthorizationStatusWithBlock:(DidChangeAuthorizationStatusBlock)block
+{
+    [self setBlocksDelegateIfNotSet];
+    [(CLLocationManagerBlocks *)self.blocksDelegate setDidChangeAuthorizationStatusBlock:block];
+}
+
+- (void)didEnterRegionWithBlock:(DidEnterRegionBlock)block
+{
+    [self setBlocksDelegateIfNotSet];
+    [(CLLocationManagerBlocks *)self.blocksDelegate setDidEnterRegionBlock:block];
+}
+
+- (void)didExitRegionWithBlock:(DidExitRegionBlock)block
+{
+    [self setBlocksDelegateIfNotSet];
+    [(CLLocationManagerBlocks *)self.blocksDelegate setDidExitRegionBlock:block];
+}
+
+- (void)monitoringDidFailForRegionWithBlock:(MonitoringDidFailForRegionWithBlock)block
+{
+    [self setBlocksDelegateIfNotSet];
+    [(CLLocationManagerBlocks *)self.blocksDelegate setMonitoringDidFailForRegionWithBlock:block];
+}
+
+- (void)didStartMonitoringForRegionWithBlock:(DidStartMonitoringForRegionWithBlock)block
+{
+    [self setBlocksDelegateIfNotSet];
+    [(CLLocationManagerBlocks *)self.blocksDelegate setDidStartMonitoringForRegionWithBlock:block];
+}
+
 - (void)startUpdatingLocationWithUpdateBlock:(LocationManagerUpdateBlock)updateBlock
 {
     [self setBlocksDelegateIfNotSet];
-    [self.blocksDelegate startUpdatingLocationWithUpdateBlock:updateBlock];
+    [(CLLocationManagerBlocks *)self.blocksDelegate setUpdateBlock:updateBlock];
     
     [self startUpdatingLocation];
 }
-
-- (void)setDidChangeAuthorizationStatusWithBlock:(DidChangeAuthorizationStatusBlock)block
-{
-    [self setBlocksDelegateIfNotSet];
-    [self.blocksDelegate setDidChangeAuthorizationStatusWithBlock:block];
-}
-
-- (void)setDidEnterRegionWithBlock:(DidEnterRegionBlock)block
-{
-    [self setBlocksDelegateIfNotSet];
-    [self.blocksDelegate setDidEnterRegionWithBlock:block];
-}
-
-//- (void)setDidExitRegionWithBlock:(void(^)(CLLocationManager *manager, CLRegion *region))block;
-//
-//- (void)setMonitoringDidFailForRegionWithBlock:(void(^)(CLLocationManager *manager, CLRegion *region, NSError *error))block;
-//
-//- (void)setDidStartMonitoringForRegionWithBlock:(void(^)(CLLocationManager *manager, CLRegion *region))block;
-//
-//- (void)setDidUpdateHeadingWithBlock:(void(^)(CLLocationManager *manager, CLHeading *newHeading))block;
-//
-//- (void)setLocationManagerShouldDisplayHeadingCalibrationWithBlock:(void(^)(CLLocationManager *manager))block;
 
 
 #pragma mark - Setters / Getters
@@ -197,7 +262,19 @@ static const void *CLLocationManagerUpdateAccuracyKey = &CLLocationManagerUpdate
 
 - (void)setUpdateAccuracyFilter:(CLUpdateAccuracyFilter)updateAccuracyFilter
 {
+    [self setBlocksDelegateIfNotSet];
     [(CLLocationManagerBlocks *)self.blocksDelegate setUpdateAccuracyFilter:updateAccuracyFilter];
+}
+
+- (CLLocationAgeFilter)updateLocationAgeFilter
+{
+    return [(CLLocationManagerBlocks *)self.blocksDelegate updateLocationAgeFilter];
+}
+
+- (void)setUpdateLocationAgeFilter:(CLLocationAgeFilter)updateLocationAgeFilter
+{
+    [self setBlocksDelegateIfNotSet];
+    [(CLLocationManagerBlocks *)self.blocksDelegate setUpdateLocationAgeFilter:updateLocationAgeFilter];
 }
 
 

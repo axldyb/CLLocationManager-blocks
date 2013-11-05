@@ -9,80 +9,181 @@
 #import <CoreLocation/CoreLocation.h>
 #import <objc/runtime.h>
 
-/*
- *  CLUpdateAccuracyFilter
- *
- *  Discussion:
- *    Type used to represent a location accuracy level in meters. The lower the value in meters, the
- *    more physically precise the location is. A negative accuracy value indicates an invalid location.
+///-----------------------
+/// @name Additional types
+///-----------------------
+
+/**
+ Type used to represent a location accuracy level in meters. The lower the value in meters, the
+ more physically precise the location is. A negative accuracy value indicates an invalid location.
  */
 typedef double CLUpdateAccuracyFilter;
 
-/*
- *  LocationManagerUpdateBlock
- *
- *  Discussion:
- *    Block used to notify about updates to the location manager
+/**
+ Type used to represent a locations age in seconds.
  */
-typedef void (^LocationManagerUpdateBlock)(CLLocation *location, NSError *error, BOOL stopUpdating);
+typedef NSTimeInterval CLLocationAgeFilter;
 
-/*
- *  DidChangeAuthorizationStatusBlock
- *
- *  Discussion:
- *    
+/**
+This constant indicates the minimum accuracy required before an update is generated.
+*/
+extern const CLUpdateAccuracyFilter kCLUpdateAccuracyFilterNone;
+
+/**
+ This constant indicates the maximum age in seconds required before an update is generated.
+ */
+extern const CLLocationAgeFilter kCLLocationAgeFilterNone;
+
+
+///-------------
+/// @name Blocks
+///-------------
+
+/**
+ Block used to notify about updates to the location manager.
+ 
+ On success the updated location will be provided. If we have an error the location will be nil.
+ 
+ @param manager The location manager that sends the update
+ @param location The updated location
+ @param error Used if there was an error during update
+ @param stopUpdating Set this to YES in order to stop location updates
+ */
+typedef void (^LocationManagerUpdateBlock)(CLLocationManager *manager, CLLocation *location, NSError *error, BOOL *stopUpdating);
+
+/**
+ Block used to notify about changes to the authorization status
+ 
+ @param manager The location manager that sends the status
+ @param status The status
  */
 typedef void (^DidChangeAuthorizationStatusBlock)(CLLocationManager *manager, CLAuthorizationStatus status);
 
-/*
- *  DidEnterRegionBlock
- *
- *  Discussion:
- *
+/**
+ Block used to notify that the user entered a region
  */
 typedef void (^DidEnterRegionBlock)(CLLocationManager *manager, CLRegion *region);
 
+/**
+ Block used to notify that the user exited a region
+ */
+typedef void (^DidExitRegionBlock)(CLLocationManager *manager, CLRegion *region);
+
+/**
+ Block used to notify that monitoring failed for the specified region
+ */
+typedef void (^MonitoringDidFailForRegionWithBlock)(CLLocationManager *manager, CLRegion *region, NSError *error);
+
+/**
+ Block used to notify that monitoring started for the specified region
+ */
+typedef void (^DidStartMonitoringForRegionWithBlock)(CLLocationManager *manager, CLRegion *region);
+
+/**
+ Block used to notify about location updates
+ */
+typedef void (^DidUpdateLocationsBlock)(CLLocationManager *manager, NSArray *locations);
+
+
+///-------------------
+/// @name Helper class
+///-------------------
+
+/**
+ This is a helper class in order to add blocks to CLLocationManager as a category.
+ It is the CLLocationManager delegate and makes sure the correct block is called.
+ */
 @interface CLLocationManagerBlocks : NSObject <CLLocationManagerDelegate>
-
-@property (nonatomic, weak) CLLocationManager *parentManager;
-
 @end
 
 
+///---------------
+/// @name Category
+///---------------
+
+/**
+ The blocks category on CLLocationManager
+ */
 @interface CLLocationManager (blocks)
 
-/*
- *  blocksDelegate
- *
- *  Discussion:
- *      Used internally to enable the location manager blocks to be added as a category
+/**
+ Used internally to enable the location manager blocks to be added as a category
  */
 @property (nonatomic, retain, readonly) id blocksDelegate;
 
-/*
- *  updateAccuracyFilter
- *
- *  Discussion:
- *      Specifies the minimum update accuracy when using update block. Client will not be notified of movements of less
- *      than the stated value, unless the accuracy has improved. Pass in kCLUpdateAccuracyFilterNone to be
- *      notified of all movements. By default, kCLUpdateAccuracyFilterNone is used.
+/**
+ Specifies the minimum update accuracy when using blocks. Client will not be notified of movements of less
+ than the stated value, unless the accuracy has improved. Pass in kCLUpdateAccuracyFilterNone to be
+ notified of all movements. By default, kCLUpdateAccuracyFilterNone is used.
  */
 @property(assign, nonatomic) CLUpdateAccuracyFilter updateAccuracyFilter;
 
+/**
+ Specifies the maximum update location age when using blocks. Client will not be notified locations with 
+ an age greater than the stated value. Pass in kCLLocationAgeFilterNone to be notified of all movements. 
+ By default, kCLLocationAgeFilterNone is used.
+ */
+@property(assign, nonatomic) CLLocationAgeFilter updateLocationAgeFilter;
+
+
+///--------------------------------------
+/// @name Replacement methods with blocks
+///--------------------------------------
+
+/**
+ Replacement for the didUpdateLocations: delegate method
+ 
+ param block The block replacing delegate method
+ */
+- (void)didUpdateLocationsWithBlock:(DidUpdateLocationsBlock)block;
+
+/**
+ Replacement for the didChangeAuthorizationStatus: delegate method
+ 
+ param block The block replacing delegate method
+ */
+- (void)didChangeAuthorizationStatusWithBlock:(DidChangeAuthorizationStatusBlock)block;
+
+/**
+ Replacement for the didEnterRegion: delegate method
+ 
+ param block The block replacing delegate method
+ */
+- (void)didEnterRegionWithBlock:(DidEnterRegionBlock)block;
+
+/**
+ Replacement for the didExitRegion: delegate method
+ 
+ param block The block replacing delegate method
+ */
+- (void)didExitRegionWithBlock:(DidExitRegionBlock)block;
+
+/**
+ Replacement for the monitoringDidFailForRegion: delegate method
+ 
+ param block The block replacing delegate method
+ */
+- (void)monitoringDidFailForRegionWithBlock:(MonitoringDidFailForRegionWithBlock)block;
+
+/**
+ Replacement for the didStartMonitoringForRegion: delegate method
+ 
+ param block The block replacing delegate method
+ */
+- (void)didStartMonitoringForRegionWithBlock:(DidStartMonitoringForRegionWithBlock)block;
+
+
+///-------------------------------------
+/// @name Additional methods with blocks
+///-------------------------------------
+
+/**
+ New method with a block giving you all you need to recive updates in one single block.
+ Note that location updates will start automatically when calling this method. 
+ To stop location updates, simply set the *stopUpdating param to YES.
+ 
+ param updateBlock The block used for location updates. 
+ */
 - (void)startUpdatingLocationWithUpdateBlock:(LocationManagerUpdateBlock)updateBlock;
-
-- (void)setDidChangeAuthorizationStatusWithBlock:(DidChangeAuthorizationStatusBlock)block;
-
-- (void)setDidEnterRegionWithBlock:(DidEnterRegionBlock)block;
-
-- (void)setDidExitRegionWithBlock:(void(^)(CLLocationManager *manager, CLRegion *region))block;
-
-- (void)setMonitoringDidFailForRegionWithBlock:(void(^)(CLLocationManager *manager, CLRegion *region, NSError *error))block;
-
-- (void)setDidStartMonitoringForRegionWithBlock:(void(^)(CLLocationManager *manager, CLRegion *region))block;
-
-- (void)setDidUpdateHeadingWithBlock:(void(^)(CLLocationManager *manager, CLHeading *newHeading))block;
-
-- (void)setLocationManagerShouldDisplayHeadingCalibrationWithBlock:(void(^)(CLLocationManager *manager))block;
 
 @end

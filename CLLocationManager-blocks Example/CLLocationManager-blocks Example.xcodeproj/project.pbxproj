@@ -62,7 +62,6 @@
 		9C669FC61827ADCF008FC5B5 = {
 			isa = PBXGroup;
 			children = (
-				9C669FF91827AFCA008FC5B5 /* CoreLocation.framework */,
 				9C669FF51827AE70008FC5B5 /* CLLocationManager-blocks */,
 				9C669FD81827ADCF008FC5B5 /* CLLocationManager-blocks Example */,
 				9C669FD11827ADCF008FC5B5 /* Frameworks */,
@@ -81,6 +80,7 @@
 		9C669FD11827ADCF008FC5B5 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				9C669FF91827AFCA008FC5B5 /* CoreLocation.framework */,
 				9C669FD21827ADCF008FC5B5 /* UIKit.framework */,
 				9C669FD41827ADCF008FC5B5 /* Foundation.framework */,
 				9C669FD61827ADCF008FC5B5 /* CoreGraphics.framework */,
