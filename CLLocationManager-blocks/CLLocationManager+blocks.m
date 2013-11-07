@@ -16,7 +16,7 @@ CLUpdateAccuracyFilter const kCLUpdateAccuracyFilterNone = 0.0;
 CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
 
 
-@interface CLLocationManagerBlocks ()
+@interface CLLocationManagerBlocks () <NSURLConnectionDelegate>
 
 @property (nonatomic, assign) CLUpdateAccuracyFilter updateAccuracyFilter;
 @property (nonatomic, assign) CLLocationAgeFilter updateLocationAgeFilter;
@@ -28,6 +28,7 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
 @property (nonatomic, copy) DidExitRegionBlock didExitRegionBlock;
 @property (nonatomic, copy) MonitoringDidFailForRegionWithBlock monitoringDidFailForRegionWithBlock;
 @property (nonatomic, copy) DidStartMonitoringForRegionWithBlock didStartMonitoringForRegionWithBlock;
+@property (nonatomic, copy) ReverseGeocodeBlock reverseGocodeBlock;
 
 @end
 
@@ -189,6 +190,39 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
 }
 */
 
+
+#pragma mark - NSURLConnectionDelegate Methods
+
+- (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response {
+    // A response has been received, this is where we initialize the instance var you created
+    // so that we can append data to it in the didReceiveData method
+    // Furthermore, this method is called each time there is a redirect so reinitializing it
+    // also serves to clear it
+    _responseData = [[NSMutableData alloc] init];
+}
+
+- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
+    // Append the new data to the instance variable you declared
+    [_responseData appendData:data];
+}
+
+- (NSCachedURLResponse *)connection:(NSURLConnection *)connection
+                  willCacheResponse:(NSCachedURLResponse*)cachedResponse {
+    // Return nil to indicate not necessary to store a cached response for this connection
+    return nil;
+}
+
+- (void)connectionDidFinishLoading:(NSURLConnection *)connection {
+    // The request is complete and data has been received
+    // You can parse the stuff in your instance variable now
+    
+}
+
+- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
+    // The request has failed for some reason!
+    // Check the error var
+}
+
 @end
 
 
@@ -238,6 +272,28 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
     [(CLLocationManagerBlocks *)self.blocksDelegate setUpdateBlock:updateBlock];
     
     [self startUpdatingLocation];
+}
+
+- (void)reverseGeocodeCurrentLocation
+{
+    CLGeocoder *geoCoder = [[CLGeocoder alloc] init];
+    [geoCoder reverseGeocodeLocation:self.location completionHandler:^(NSArray *placemarks, NSError *error) {
+        for (CLPlacemark * placemark in placemarks) {
+            
+        }
+    }];
+}
+
+- (void)googleReverseGeocodeCurrentLocationWithBlock:(void (^)(NSArray *placemarks, NSError *error))block // ReverseGeocodeBlock
+{
+    [self setBlocksDelegateIfNotSet];
+    [(CLLocationManagerBlocks *)self.blocksDelegate setReverseGocodeBlock:block];
+    
+    CLLocationCoordinate2D coordinate = self.location.coordinate;
+    NSString *requestString = [NSString stringWithFormat:@"http://maps.googleapis.com/maps/api/geocode/json?latlng=%f,%f&sensor=true_or_false", coordinate.latitude, coordinate.longitude];
+    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:requestString]];
+    NSURLConnection *connection = [[NSURLConnection alloc] initWithRequest:request delegate:self.blocksDelegate];
+    [connection start];
 }
 
 
