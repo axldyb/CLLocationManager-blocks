@@ -133,42 +133,43 @@ typedef void (^DidUpdateLocationsBlock)(CLLocationManager *manager, NSArray *loc
 /**
  Replacement for the didUpdateLocations: delegate method
  
- param block The block replacing delegate method
+ @param block The block replacing delegate method
  */
 - (void)didUpdateLocationsWithBlock:(DidUpdateLocationsBlock)block;
 
 /**
  Replacement for the didChangeAuthorizationStatus: delegate method
  
- param block The block replacing delegate method
+ @param block The block replacing delegate method
  */
 - (void)didChangeAuthorizationStatusWithBlock:(DidChangeAuthorizationStatusBlock)block;
 
 /**
  Replacement for the didEnterRegion: delegate method
  
- param block The block replacing delegate method
+ 
+ @param block The block replacing delegate method
  */
 - (void)didEnterRegionWithBlock:(DidEnterRegionBlock)block;
 
 /**
  Replacement for the didExitRegion: delegate method
  
- param block The block replacing delegate method
+ @param block The block replacing delegate method
  */
 - (void)didExitRegionWithBlock:(DidExitRegionBlock)block;
 
 /**
  Replacement for the monitoringDidFailForRegion: delegate method
  
- param block The block replacing delegate method
+ @param block The block replacing delegate method
  */
 - (void)monitoringDidFailForRegionWithBlock:(MonitoringDidFailForRegionWithBlock)block;
 
 /**
  Replacement for the didStartMonitoringForRegion: delegate method
  
- param block The block replacing delegate method
+ @param block The block replacing delegate method 
  */
 - (void)didStartMonitoringForRegionWithBlock:(DidStartMonitoringForRegionWithBlock)block;
 
