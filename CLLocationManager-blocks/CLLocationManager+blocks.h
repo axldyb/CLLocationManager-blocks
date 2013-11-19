@@ -84,8 +84,6 @@ typedef void (^DidStartMonitoringForRegionWithBlock)(CLLocationManager *manager,
  */
 typedef void (^DidUpdateLocationsBlock)(CLLocationManager *manager, NSArray *locations);
 
-typedef void (^ReverseGeocodeBlock)(NSArray *placemarks, NSError *error);
-
 
 ///-------------------
 /// @name Helper class
@@ -188,7 +186,5 @@ typedef void (^ReverseGeocodeBlock)(NSArray *placemarks, NSError *error);
  param updateBlock The block used for location updates. 
  */
 - (void)startUpdatingLocationWithUpdateBlock:(LocationManagerUpdateBlock)updateBlock;
-
-- (void)reverseGeocodeCurrentLocation;
 
 @end
