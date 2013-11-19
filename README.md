@@ -1,6 +1,13 @@
 #CLLocationManager-blocks
 A category on CLLocationManager adding blocks plus some new functionality.
 
+## Installation
+CLLocationManager-block is available through [CocoaPods](http://cocoapods.org), to install
+it simply add the following line to your Podfile:
+
+```
+pod "CLLocationManager-block"
+```
 
 ##Usage
 This category provides location updates in two ways.
