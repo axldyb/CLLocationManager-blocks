@@ -19,10 +19,13 @@ This category provides location updates in two ways.
 Recieving location updates in a block.
 
 ```objective-c
+self.manager = [[CLLocationManager alloc] init]; 
 [self.manager startUpdatingLocationWithUpdateBlock:^(CLLocationManager *manager, CLLocation *location, NSError *error, BOOL *stopUpdating) {
     NSLog(@"Our new location: %@", location);
 }]; 
 ```
+__NOTE:__ Location updates will start automatically by calling this method. No need to call startUpdatingLocation.
+
 By using this block you will get the location updates without using the delegate methods. The underlying method `locationManager:didUpdateLocations:`does provide updates in an array, but we spilt them up into single updates in the block.
 
 If the update is unsuccessful an error will be provided and `location` will be `nil`. If success the `error` will be `nil` and location will be an CLLocation object.
@@ -53,6 +56,8 @@ This parameter is set to filter out location updates older than the specified va
 ##Blocks
 
 The category contains block implementations of the basic CLLocationManagerDelegate methods
+
+__NOTE:__ Unlike the startUpdatingLocationWithUpdateBlock: you will have to call startUpdatingLocation to recieve updates.
 
 ***locationManager:didUpdateLocations:***
 
