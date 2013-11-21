@@ -53,6 +53,11 @@ This parameter is set to filter out location updates older than the specified va
 
 * Default is set to `kCLLocationAgeFilterNone`
 
+####Example
+```objective-c
+self.manager.updateAccuracyFilter = 50.0;
+self.manager.updateLocationAgeFilter = 15.0;
+```
 ##Blocks
 
 The category contains block implementations of the basic CLLocationManagerDelegate methods
