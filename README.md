@@ -112,6 +112,18 @@ __NOTE:__ Unlike the startUpdatingLocationWithUpdateBlock: you will have to call
 }]
 ```
 
+##Convinience methods
+Method to ease the steps to state if location updates is authorized by the user.
+
+***isLocationUpdatesAvailable***
+
+```
+
+if ([CLLocationManager isLocationUpdatesAvailable]) {
+	// Location updates authorized
+}
+```
+
 ##License
 
 See the LICENSE file
