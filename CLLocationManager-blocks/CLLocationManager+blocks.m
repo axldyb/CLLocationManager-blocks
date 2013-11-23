@@ -262,6 +262,26 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
 }
 
 
+#pragma mark - Core Location status
+
++ (BOOL)isLocationUpdatesAvailable
+{
+    CLAuthorizationStatus status = [CLLocationManager authorizationStatus];
+    
+    switch (status) {
+        case kCLAuthorizationStatusAuthorized:
+        case kCLAuthorizationStatusNotDetermined:
+            return YES;
+            break;
+        case kCLAuthorizationStatusDenied:
+        case kCLAuthorizationStatusRestricted:
+        default:
+            return NO;
+            break;
+    }
+}
+
+
 #pragma mark - Setters / Getters
 
 - (id)blocksDelegate

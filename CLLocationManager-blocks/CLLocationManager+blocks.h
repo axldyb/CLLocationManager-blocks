@@ -142,6 +142,18 @@ typedef void (^DidUpdateLocationsBlock)(CLLocationManager *manager, NSArray *loc
 @property(assign, nonatomic) CLLocationAgeFilter updateLocationAgeFilter;
 
 
+///-----------------------------------
+/// @name Check location authorization
+///-----------------------------------
+
+/**
+ Used to check if user has enabled location updates.
+ 
+ @return Boolean indicating location udates availability
+ */
++ (BOOL)isLocationUpdatesAvailable;
+
+
 ///--------------------------------------
 /// @name Replacement methods with blocks
 ///--------------------------------------
