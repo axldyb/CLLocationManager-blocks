@@ -25,10 +25,12 @@
     self.manager.updateAccuracyFilter = 50.0;
     self.manager.updateLocationAgeFilter = 15.0;
     
-    [self.manager startUpdatingLocationWithUpdateBlock:^(CLLocationManager *manager, CLLocation *location, NSError *error, BOOL *stopUpdating) {
-        NSLog(@"Our new location: %@", location);
-        *stopUpdating = YES;
-    }]; 
+    if ([CLLocationManager isLocationUpdatesAvailable]) {
+        [self.manager startUpdatingLocationWithUpdateBlock:^(CLLocationManager *manager, CLLocation *location, NSError *error, BOOL *stopUpdating) {
+            NSLog(@"Our new location: %@", location);
+            *stopUpdating = YES;
+        }];
+    }
 }
 
 @end
