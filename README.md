@@ -112,7 +112,7 @@ __NOTE:__ Unlike the startUpdatingLocationWithUpdateBlock: you will have to call
 }]
 ```
 
-##Convinience methods
+##Convenience methods
 Method to ease the steps to state if location updates is authorized by the user.
 
 ***isLocationUpdatesAvailable***
