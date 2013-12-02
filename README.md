@@ -6,7 +6,7 @@ CLLocationManager-block is available through [CocoaPods](http://cocoapods.org), 
 it simply add the following line to your Podfile:
 
 ```
-pod "CLLocationManager-block"
+pod 'CLLocationManager-blocks'
 ```
 
 ##Usage
