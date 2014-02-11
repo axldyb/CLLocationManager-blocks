@@ -68,6 +68,18 @@ extern const CLLocationAgeFilter kCLLocationAgeFilterNone;
 typedef void (^LocationManagerUpdateBlock)(CLLocationManager *manager, CLLocation *location, NSError *error, BOOL *stopUpdating);
 
 /**
+ Block used to notify about updates to the heading
+ 
+ On success the updated heading will be provided. If we have an error the location will be nil.
+ 
+ @param manager      The location manager that sends the update
+ @param heading      The updated heading
+ @param error        Used if an error occurs during the update
+ @param stopUpdating Set this to YES in order to stop heading updates
+ */
+typedef void(^HeadingUpdateBlock)(CLLocationManager *manager, CLHeading *heading, NSError *error, BOOL *stopUpdating);
+
+/**
  Block used to notify about changes to the authorization status
  
  @param manager The location manager that sends the status
@@ -100,6 +112,15 @@ typedef void (^DidStartMonitoringForRegionWithBlock)(CLLocationManager *manager,
  */
 typedef void (^DidUpdateLocationsBlock)(CLLocationManager *manager, NSArray *locations);
 
+/**
+ Block used to notify about a heading update
+ */
+typedef void(^DidUpdateHeadingBlock)(CLLocationManager *manager, CLHeading *heading);
+
+/**
+ Block used to confirm if calibration should be displayed
+ */
+typedef BOOL(^ShouldDisplayCalibrationBlock)(CLLocationManager *manager);
 
 ///-------------------
 /// @name Helper class
@@ -201,18 +222,34 @@ typedef void (^DidUpdateLocationsBlock)(CLLocationManager *manager, NSArray *loc
  */
 - (void)didStartMonitoringForRegionWithBlock:(DidStartMonitoringForRegionWithBlock)block;
 
+/**
+ Replacement for the didUpdateHeading: delegate method
+ 
+ @param block The block replacing delegate method
+ */
+- (void)didUpdateHeadingWithBock:(DidUpdateHeadingBlock)block;
+
+/**
+ Replacement for the shouldDisplayCalibrationBlock: delegate methods
+ 
+ @param block The block replacing delegate method
+ */
+- (void)shouldDisplayHeadingCalibrationWithBlock:(ShouldDisplayCalibrationBlock)block;
 
 ///-------------------------------------
 /// @name Additional methods with blocks
 ///-------------------------------------
 
 /**
- New method with a block giving you all you need to recive updates in one single block.
+ New method with a block giving you all you need to receive updates in one single block.
  Note that location updates will start automatically when calling this method. 
  To stop location updates, simply set the *stopUpdating param to YES.
  
  param updateBlock The block used for location updates. 
  */
 - (void)startUpdatingLocationWithUpdateBlock:(LocationManagerUpdateBlock)updateBlock;
+
+
+- (void)startUpdatingHeadingWithUpdateBlock:(HeadingUpdateBlock)updateBlock;
 
 @end
