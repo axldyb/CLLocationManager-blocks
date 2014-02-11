@@ -37,12 +37,15 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
 @property (nonatomic, assign) CLLocationAgeFilter updateLocationAgeFilter;
 
 @property (nonatomic, copy) DidUpdateLocationsBlock didUpdateLocationsBlock;
+@property (nonatomic, copy) DidUpdateHeadingBlock didUpdateHeadingBlock;
 @property (nonatomic, copy) LocationManagerUpdateBlock updateBlock;
+@property (nonatomic, copy) HeadingUpdateBlock headingUpdateBlock;
 @property (nonatomic, copy) DidChangeAuthorizationStatusBlock didChangeAuthorizationStatusBlock;
 @property (nonatomic, copy) DidEnterRegionBlock didEnterRegionBlock;
 @property (nonatomic, copy) DidExitRegionBlock didExitRegionBlock;
 @property (nonatomic, copy) MonitoringDidFailForRegionWithBlock monitoringDidFailForRegionWithBlock;
 @property (nonatomic, copy) DidStartMonitoringForRegionWithBlock didStartMonitoringForRegionWithBlock;
+@property (nonatomic, copy) ShouldDisplayCalibrationBlock shouldDisplayCalibrationBlock;
 
 @end
 
@@ -180,20 +183,36 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
     }
 }
 
-
-// TODO: (AD) Implement these methods if required.
-
-/*
 - (void)locationManager:(CLLocationManager *)manager didUpdateHeading:(CLHeading *)newHeading
 {
-	
+    DidUpdateHeadingBlock didUpdateHeadingBlock = self.didUpdateHeadingBlock;
+    if (didUpdateHeadingBlock) {
+        didUpdateHeadingBlock(manager, newHeading);
+    }
+    
+    HeadingUpdateBlock headingUpdateBlock = self.headingUpdateBlock;
+    if (headingUpdateBlock) {
+        __block BOOL stopUpdates = NO;
+        headingUpdateBlock(manager, newHeading, nil, &stopUpdates);
+        
+        if (stopUpdates) {
+            [manager stopUpdatingHeading];
+            self.headingUpdateBlock = nil;
+        }
+    }
 }
 
 - (BOOL)locationManagerShouldDisplayHeadingCalibration:(CLLocationManager *)manager
 {
-    return NO;
+    ShouldDisplayCalibrationBlock shouldDisplayCalibrationBlock = self.shouldDisplayCalibrationBlock;
+    if (shouldDisplayCalibrationBlock) {
+        return shouldDisplayCalibrationBlock(manager);
+    }
+    else return NO;
 }
 
+// TODO: (AD) Implement these methods if required.
+/*
 - (void)locationManagerDidPauseLocationUpdates:(CLLocationManager *)manager
 {
     
@@ -261,6 +280,25 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
     [self startUpdatingLocation];
 }
 
+- (void)didUpdateHeadingWithBock:(DidUpdateHeadingBlock)block
+{
+    [self setBlocksDelegateIfNotSet];
+    [(CLLocationManagerBlocks *)self.blocksDelegate setDidUpdateHeadingBlock:block];
+}
+
+- (void)startUpdatingHeadingWithUpdateBlock:(HeadingUpdateBlock)updateBlock
+{
+    [self setBlocksDelegateIfNotSet];
+    [(CLLocationManagerBlocks *)self.blocksDelegate setHeadingUpdateBlock:updateBlock];
+    
+    [self startUpdatingHeading];
+}
+
+- (void)shouldDisplayHeadingCalibrationWithBlock:(ShouldDisplayCalibrationBlock)block
+{
+    [self setBlocksDelegateIfNotSet];
+    [(CLLocationManagerBlocks *)self.blocksDelegate setShouldDisplayCalibrationBlock:block];
+}
 
 #pragma mark - Core Location status
 
