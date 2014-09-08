@@ -392,7 +392,6 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
     [self setBlocksDelegateIfNotSet];
     [(CLLocationManagerBlocks *)self.blocksDelegate setUpdateBlock:updateBlock];
     
-    [self requestAuthorization];
     [self startUpdatingLocation];
 }
 
@@ -402,13 +401,6 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
     [(CLLocationManagerBlocks *)self.blocksDelegate setHeadingUpdateBlock:updateBlock];
     
     [self startUpdatingHeading];
-}
-
-
-#pragma mark - Private
-
-- (void)requestAuthorization
-{
 }
 
 
@@ -470,7 +462,7 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
 #pragma mark - Class Delegate
 
 - (void)setBlocksDelegateIfNotSet
-{    
+{
     if (!self.blocksDelegate) {
         self.blocksDelegate = [[CLLocationManagerBlocks alloc] init];
         [self setDelegate:self.blocksDelegate];

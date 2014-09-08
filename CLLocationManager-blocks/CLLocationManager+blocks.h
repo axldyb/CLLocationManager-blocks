@@ -228,6 +228,29 @@ typedef void(^DidFinishDeferredUpdatesWithErrorBlock)(CLLocationManager *manager
 + (instancetype)updateManagerWithAccuracy:(CLUpdateAccuracyFilter)updateAccuracyFilter locationAge:(CLLocationAgeFilter)updateLocationAgeFilter;
 
 
+///-------------------------------------
+/// @name Additional methods with blocks
+///-------------------------------------
+
+/**
+ New method with a block giving you all you need to receive updates in one single block.
+ Note that location updates will start automatically when calling this method.
+ To stop location updates, simply set the *stopUpdating param to YES.
+ 
+ param updateBlock The block used for location updates.
+ */
+- (void)startUpdatingLocationWithUpdateBlock:(LocationManagerUpdateBlock)updateBlock;
+
+/**
+ This method behaves just as the startUpdatingLocationWithUpdateBlock: method,
+ but it does notify about heading updates instead of locations.
+ To stop updates, simply set the *stopUpdating param to YES.
+ 
+ param updateBlock The block used for heading updates.
+ */
+- (void)startUpdatingHeadingWithUpdateBlock:(HeadingUpdateBlock)updateBlock;
+
+
 ///-----------------------------------
 /// @name Check location authorization
 ///-----------------------------------
@@ -348,22 +371,5 @@ typedef void(^DidFinishDeferredUpdatesWithErrorBlock)(CLLocationManager *manager
  @param block The block replacing delegate method
  */
 - (void)didFinishDeferredUpdatesWithErrorWithBlock:(DidFinishDeferredUpdatesWithErrorBlock)block;
-
-
-///-------------------------------------
-/// @name Additional methods with blocks
-///-------------------------------------
-
-/**
- New method with a block giving you all you need to receive updates in one single block.
- Note that location updates will start automatically when calling this method. 
- To stop location updates, simply set the *stopUpdating param to YES.
- 
- param updateBlock The block used for location updates. 
- */
-- (void)startUpdatingLocationWithUpdateBlock:(LocationManagerUpdateBlock)updateBlock;
-
-
-- (void)startUpdatingHeadingWithUpdateBlock:(HeadingUpdateBlock)updateBlock;
 
 @end
