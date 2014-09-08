@@ -25,8 +25,6 @@
 #import "CLLocationManager+blocks.h"
 
 static const void *CLLocationManagerBlocksDelegateKey = &CLLocationManagerBlocksDelegateKey;
-static const void *CLLocationManagerUpdateKey = &CLLocationManagerUpdateKey;
-static const void *CLLocationManagerUpdateAccuracyKey = &CLLocationManagerUpdateAccuracyKey;
 
 CLUpdateAccuracyFilter const kCLUpdateAccuracyFilterNone = 0.0;
 CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
@@ -88,7 +86,6 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
     // Pre iOS 6 is using this method for updates. Passing the update on to the new method.
     [self locationManager:manager didUpdateLocations:@[newLocation]];
 }
-
 
 - (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations
 {
@@ -232,6 +229,15 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
     }
 }
 
+- (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status
+{
+    DidChangeAuthorizationStatusBlock didChangeAuthorizationStatusBlock = self.didChangeAuthorizationStatusBlock;
+    
+	if (didChangeAuthorizationStatusBlock) {
+        didChangeAuthorizationStatusBlock(manager, status);
+    }
+}
+
 - (void)locationManager:(CLLocationManager *)manager didStartMonitoringForRegion:(CLRegion *)region
 {
 	DidStartMonitoringForRegionWithBlock didStartMonitoringForRegionWithBlock = self.didStartMonitoringForRegionWithBlock;
@@ -267,20 +273,24 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
 @end
 
 
-{
-    
-}
-
-- (void)locationManager:(CLLocationManager *)manager didFinishDeferredUpdatesWithError:(NSError *)error
-{
-    
-}
-*/
-
-@end
-
-
 @implementation CLLocationManager (blocks)
+
+#pragma mark - Initialization
+
++ (instancetype)updateManager
+{
+    return [[CLLocationManager alloc] init];
+}
+
++ (instancetype)updateManagerWithAccuracy:(CLUpdateAccuracyFilter)updateAccuracyFilter locationAge:(CLLocationAgeFilter)updateLocationAgeFilter;
+{
+    CLLocationManager *manger = [[CLLocationManager alloc] init];
+    manger.updateAccuracyFilter = updateAccuracyFilter;
+    manger.updateLocationAgeFilter = updateLocationAgeFilter;
+    return manger;
+}
+
+
 
 #pragma mark - Location Manager Blocks
 
@@ -375,6 +385,15 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
 }
 
 
+#pragma mark Additional blocks
+
+- (void)startUpdatingLocationWithUpdateBlock:(LocationManagerUpdateBlock)updateBlock
+{
+    [self setBlocksDelegateIfNotSet];
+    [(CLLocationManagerBlocks *)self.blocksDelegate setUpdateBlock:updateBlock];
+    
+    [self requestAuthorization];
+    [self startUpdatingLocation];
 }
 
 - (void)startUpdatingHeadingWithUpdateBlock:(HeadingUpdateBlock)updateBlock
@@ -385,11 +404,13 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
     [self startUpdatingHeading];
 }
 
-- (void)shouldDisplayHeadingCalibrationWithBlock:(ShouldDisplayCalibrationBlock)block
+
+#pragma mark - Private
+
+- (void)requestAuthorization
 {
-    [self setBlocksDelegateIfNotSet];
-    [(CLLocationManagerBlocks *)self.blocksDelegate setShouldDisplayCalibrationBlock:block];
 }
+
 
 #pragma mark - Core Location status
 
@@ -455,6 +476,5 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
         [self setDelegate:self.blocksDelegate];
     }
 }
-
 
 @end

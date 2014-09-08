@@ -199,6 +199,35 @@ typedef void(^DidFinishDeferredUpdatesWithErrorBlock)(CLLocationManager *manager
 @property(assign, nonatomic) CLLocationAgeFilter updateLocationAgeFilter;
 
 
+///----------------------------
+/// @name Custom initialization
+///----------------------------
+
+/**
+ 
+ Default intialization of the update location manager
+ 
+ @return CLLocationManager instance
+ */
++ (instancetype)updateManager;
+
+
+/**
+ 
+ Initializes the location manager with filters in one call.
+ 
+ @note Default usage description is NSLocationAlwaysUsageDescription. 
+ This has to be set in the Info.Plist as a key.
+ The value may be a message to the user.
+ 
+ @param updateAccuracyFilter The update accuracy filter
+ @param updateLocationAgeFilter The location age filter
+ 
+ @return CLLocationManager instance
+ */
++ (instancetype)updateManagerWithAccuracy:(CLUpdateAccuracyFilter)updateAccuracyFilter locationAge:(CLLocationAgeFilter)updateLocationAgeFilter;
+
+
 ///-----------------------------------
 /// @name Check location authorization
 ///-----------------------------------
