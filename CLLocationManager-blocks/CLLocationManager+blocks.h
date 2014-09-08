@@ -167,6 +167,11 @@ typedef void(^LocationManagerDidResumeLocationUpdatesBlock)(CLLocationManager *m
  */
 typedef void(^DidFinishDeferredUpdatesWithErrorBlock)(CLLocationManager *manager, NSError *error);
 
+/**
+ Block used to notify about new visit-related events
+ */
+typedef void(^DidVisitBLock)(CLLocationManager *manager, CLVisit *visit);
+
 
 ///-------------------
 /// @name Helper class

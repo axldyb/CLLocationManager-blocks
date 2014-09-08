@@ -53,6 +53,7 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
 @property (nonatomic, copy) LocationManagerDidPauseLocationUpdatesBlock locationManagerDidPauseLocationUpdatesBlock;
 @property (nonatomic, copy) LocationManagerDidResumeLocationUpdatesBlock locationManagerDidResumeLocationUpdatesBlock;
 @property (nonatomic, copy) DidFinishDeferredUpdatesWithErrorBlock didFinishDeferredUpdatesWithErrorBlock;
+@property (nonatomic, copy) DidVisitBLock didVisitBlock;
 
 @end
 
@@ -280,6 +281,14 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
     }
 }
 
+- (void)locationManager:(CLLocationManager *)manager didVisit:(CLVisit *)visit
+{
+    DidVisitBLock didVisitBlock = self.didVisitBlock;
+    if (didVisitBlock) {
+        didVisitBlock(manager, visit);
+    }
+}
+
 @end
 
 
@@ -383,6 +392,11 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
 - (void)didFinishDeferredUpdatesWithErrorWithBlock:(DidFinishDeferredUpdatesWithErrorBlock)block
 {
     [(CLLocationManagerBlocks *)self.blocksDelegate setDidFinishDeferredUpdatesWithErrorBlock:block];
+}
+
+- (void)didVisitWithBlock:(DidVisitBLock)block
+{
+    [(CLLocationManagerBlocks *)self.blocksDelegate setDidVisitBlock:block];
 }
 
 
