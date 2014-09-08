@@ -51,6 +51,16 @@ extern const CLUpdateAccuracyFilter kCLUpdateAccuracyFilterNone;
 extern const CLLocationAgeFilter kCLLocationAgeFilterNone;
 
 
+///--------------------------------
+/// @name Authorization Description
+///--------------------------------
+
+typedef NS_ENUM(NSUInteger, CLLocationUpdateAuthorizationDescription) {
+    CLLocationUpdateAuthorizationDescriptionAlways,
+    CLLocationUpdateAuthorizationDescriptionWhenInUse,
+};
+
+
 ///-------------
 /// @name Blocks
 ///-------------
@@ -226,6 +236,22 @@ typedef void(^DidFinishDeferredUpdatesWithErrorBlock)(CLLocationManager *manager
  @return CLLocationManager instance
  */
 + (instancetype)updateManagerWithAccuracy:(CLUpdateAccuracyFilter)updateAccuracyFilter locationAge:(CLLocationAgeFilter)updateLocationAgeFilter;
+
+
+/**
+ 
+ Initializes the location manager with filters in one call.
+ 
+ @note NSLocationAlwaysUsageDescription or NSLocationWhenInUseUsageDescription
+ has to be set in the Info.Plist as a key.
+ The value may be a message to the user.
+ 
+ @param updateAccuracyFilter The update accuracy filter
+ @param updateLocationAgeFilter The location age filter
+ 
+ @return CLLocationManager instance
+ */
++ (instancetype)updateManagerWithAccuracy:(CLUpdateAccuracyFilter)updateAccuracyFilter locationAge:(CLLocationAgeFilter)updateLocationAgeFilter authorizationDesciption:(CLLocationUpdateAuthorizationDescription)authorizationDescription NS_AVAILABLE_IOS(8_0);
 
 
 ///-------------------------------------

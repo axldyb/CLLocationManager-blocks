@@ -33,6 +33,7 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
 
 @property (nonatomic, assign) CLUpdateAccuracyFilter updateAccuracyFilter;
 @property (nonatomic, assign) CLLocationAgeFilter updateLocationAgeFilter;
+@property (nonatomic, assign) CLLocationUpdateAuthorizationDescription authorizationDescription;
 
 @property (nonatomic, copy) LocationManagerUpdateBlock updateBlock;
 @property (nonatomic, copy) HeadingUpdateBlock headingUpdateBlock;
@@ -76,6 +77,15 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
     }
     
     return _updateLocationAgeFilter;
+}
+
+- (CLLocationUpdateAuthorizationDescription)authorizationDescription
+{
+    if (!_authorizationDescription) {
+        _authorizationDescription = CLLocationUpdateAuthorizationDescriptionAlways;
+    }
+    
+    return _authorizationDescription;
 }
 
 
@@ -290,6 +300,12 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
     return manger;
 }
 
++ (instancetype)updateManagerWithAccuracy:(CLUpdateAccuracyFilter)updateAccuracyFilter locationAge:(CLLocationAgeFilter)updateLocationAgeFilter authorizationDesciption:(CLLocationUpdateAuthorizationDescription)authorizationDescription
+{
+    CLLocationManager *manager = [CLLocationManager updateManagerWithAccuracy:updateAccuracyFilter locationAge:updateLocationAgeFilter];
+    [manager setAuthorizationDescription:authorizationDescription];
+    return manager;
+}
 
 
 #pragma mark - Location Manager Blocks
@@ -392,6 +408,7 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
     [self setBlocksDelegateIfNotSet];
     [(CLLocationManagerBlocks *)self.blocksDelegate setUpdateBlock:updateBlock];
     
+    [self requestAuthorization];
     [self startUpdatingLocation];
 }
 
@@ -400,7 +417,23 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
     [self setBlocksDelegateIfNotSet];
     [(CLLocationManagerBlocks *)self.blocksDelegate setHeadingUpdateBlock:updateBlock];
     
+    [self requestAuthorization];
     [self startUpdatingHeading];
+}
+
+
+#pragma mark - Private
+
+- (void)requestAuthorization
+{
+    if ([self respondsToSelector:@selector(requestWhenInUseAuthorization)]) {
+        CLLocationUpdateAuthorizationDescription description = [self authorizationDescription];
+        if (description == CLLocationUpdateAuthorizationDescriptionWhenInUse) {
+            [self performSelector:@selector(requestWhenInUseAuthorization)];
+        } else {
+            [self performSelector:@selector(requestAlwaysAuthorization)];
+        }
+    }
 }
 
 
@@ -456,6 +489,17 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
 {
     [self setBlocksDelegateIfNotSet];
     [(CLLocationManagerBlocks *)self.blocksDelegate setUpdateLocationAgeFilter:updateLocationAgeFilter];
+}
+
+- (CLLocationUpdateAuthorizationDescription)authorizationDescription
+{
+    return [(CLLocationManagerBlocks *)self.blocksDelegate authorizationDescription];
+}
+
+- (void)setAuthorizationDescription:(CLLocationUpdateAuthorizationDescription)authorizationDescription
+{
+    [self setBlocksDelegateIfNotSet];
+    [(CLLocationManagerBlocks *)self.blocksDelegate setAuthorizationDescription:authorizationDescription];
 }
 
 
