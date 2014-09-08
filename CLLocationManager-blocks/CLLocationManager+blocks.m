@@ -312,91 +312,76 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
 
 - (void)didUpdateLocationsWithBlock:(DidUpdateLocationsBlock)block
 {
-    [self setBlocksDelegateIfNotSet];
     [(CLLocationManagerBlocks *)self.blocksDelegate setDidUpdateLocationsBlock:block];
 }
 
 - (void)didUpdateHeadingWithBock:(DidUpdateHeadingBlock)block
 {
-    [self setBlocksDelegateIfNotSet];
     [(CLLocationManagerBlocks *)self.blocksDelegate setDidUpdateHeadingBlock:block];
 }
 
 - (void)shouldDisplayHeadingCalibrationWithBlock:(ShouldDisplayHeadingCalibrationBlock)block
 {
-    [self setBlocksDelegateIfNotSet];
     [(CLLocationManagerBlocks *)self.blocksDelegate setShouldDisplayCalibrationBlock:block];
 }
 
 - (void)didDetermineStateWithBlock:(DidDetermineStateBlock)block
 {
-    [self setBlocksDelegateIfNotSet];
     [(CLLocationManagerBlocks *)self.blocksDelegate setDidDetermineStateBlock:block];
 }
 
 - (void)didRangeBeaconsWithBlock:(DidRangeBeaconsBlock)block
 {
-    [self setBlocksDelegateIfNotSet];
     [(CLLocationManagerBlocks *)self.blocksDelegate setDidRangeBeaconsBlock:block];
 }
 
 - (void)rangingBeaconsDidFailForRegionWithBlock:(RangingBeaconsDidFailForRegionBlock)block
 {
-    [self setBlocksDelegateIfNotSet];
     [(CLLocationManagerBlocks *)self.blocksDelegate setRangingBeaconsDidFailForRegionBlock:block];
 }
 
 - (void)didEnterRegionWithBlock:(DidEnterRegionBlock)block
 {
-    [self setBlocksDelegateIfNotSet];
     [(CLLocationManagerBlocks *)self.blocksDelegate setDidEnterRegionBlock:block];
 }
 
 - (void)didExitRegionWithBlock:(DidExitRegionBlock)block
 {
-    [self setBlocksDelegateIfNotSet];
     [(CLLocationManagerBlocks *)self.blocksDelegate setDidExitRegionBlock:block];
 }
 
 - (void)didFailWithErrorWithBlock:(DidFailWithErrorBlock)block
 {
-    [self setBlocksDelegateIfNotSet];
     [(CLLocationManagerBlocks *)self.blocksDelegate setDidFailWithErrorBlock:block];
 }
 
 - (void)monitoringDidFailForRegionWithBlock:(MonitoringDidFailForRegionWithBlock)block
 {
-    [self setBlocksDelegateIfNotSet];
     [(CLLocationManagerBlocks *)self.blocksDelegate setMonitoringDidFailForRegionWithBlock:block];
 }
 
 - (void)didChangeAuthorizationStatusWithBlock:(DidChangeAuthorizationStatusBlock)block
 {
-    [self setBlocksDelegateIfNotSet];
     [(CLLocationManagerBlocks *)self.blocksDelegate setDidChangeAuthorizationStatusBlock:block];
 }
 
 - (void)didStartMonitoringForRegionWithBlock:(DidStartMonitoringForRegionWithBlock)block
 {
-    [self setBlocksDelegateIfNotSet];
     [(CLLocationManagerBlocks *)self.blocksDelegate setDidStartMonitoringForRegionWithBlock:block];
 }
 
 - (void)locationManagerDidPauseLocationUpdatesWithBlock:(LocationManagerDidPauseLocationUpdatesBlock)block
 {
-    [self setBlocksDelegateIfNotSet];
     [(CLLocationManagerBlocks *)self.blocksDelegate setLocationManagerDidPauseLocationUpdatesBlock:block];
 }
 
 - (void)locationManagerDidResumeLocationUpdatesWithBlock:(LocationManagerDidResumeLocationUpdatesBlock)block
 {
-    [self setBlocksDelegateIfNotSet];
     [(CLLocationManagerBlocks *)self.blocksDelegate setLocationManagerDidResumeLocationUpdatesBlock:block];
 }
 
 - (void)didFinishDeferredUpdatesWithErrorWithBlock:(DidFinishDeferredUpdatesWithErrorBlock)block
 {
-    [self setBlocksDelegateIfNotSet];
     [(CLLocationManagerBlocks *)self.blocksDelegate setDidFinishDeferredUpdatesWithErrorBlock:block];
 }
 
@@ -405,7 +390,6 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
 
 - (void)startUpdatingLocationWithUpdateBlock:(LocationManagerUpdateBlock)updateBlock
 {
-    [self setBlocksDelegateIfNotSet];
     [(CLLocationManagerBlocks *)self.blocksDelegate setUpdateBlock:updateBlock];
     
     [self requestAuthorization];
@@ -414,7 +398,6 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
 
 - (void)startUpdatingHeadingWithUpdateBlock:(HeadingUpdateBlock)updateBlock
 {
-    [self setBlocksDelegateIfNotSet];
     [(CLLocationManagerBlocks *)self.blocksDelegate setHeadingUpdateBlock:updateBlock];
     
     [self requestAuthorization];
@@ -429,9 +412,9 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
     if ([self respondsToSelector:@selector(requestWhenInUseAuthorization)]) {
         CLLocationUpdateAuthorizationDescription description = [self authorizationDescription];
         if (description == CLLocationUpdateAuthorizationDescriptionWhenInUse) {
-            [self performSelector:@selector(requestWhenInUseAuthorization)];
+            [self requestWhenInUseAuthorization];
         } else {
-            [self performSelector:@selector(requestAlwaysAuthorization)];
+            [self requestAlwaysAuthorization];
         }
     }
 }
@@ -444,7 +427,8 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
     CLAuthorizationStatus status = [CLLocationManager authorizationStatus];
     
     switch (status) {
-        case kCLAuthorizationStatusAuthorized:
+        case kCLAuthorizationStatusAuthorizedAlways:
+        case kCLAuthorizationStatusAuthorizedWhenInUse:
         case kCLAuthorizationStatusNotDetermined:
             return YES;
             break;
@@ -461,12 +445,11 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
 
 - (id)blocksDelegate
 {
-    return objc_getAssociatedObject(self, CLLocationManagerBlocksDelegateKey);
-}
-
-- (void)setBlocksDelegate:(id)blocksDelegate
-{
-    objc_setAssociatedObject(self, CLLocationManagerBlocksDelegateKey, blocksDelegate, OBJC_ASSOCIATION_RETAIN);
+    id blocksDelegate = objc_getAssociatedObject(self, CLLocationManagerBlocksDelegateKey);
+    if (nil == blocksDelegate) {
+        blocksDelegate = [self setBlocksDelegate];
+    }
+    return blocksDelegate;
 }
 
 - (CLUpdateAccuracyFilter)updateAccuracyFilter
@@ -476,7 +459,6 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
 
 - (void)setUpdateAccuracyFilter:(CLUpdateAccuracyFilter)updateAccuracyFilter
 {
-    [self setBlocksDelegateIfNotSet];
     [(CLLocationManagerBlocks *)self.blocksDelegate setUpdateAccuracyFilter:updateAccuracyFilter];
 }
 
@@ -487,7 +469,6 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
 
 - (void)setUpdateLocationAgeFilter:(CLLocationAgeFilter)updateLocationAgeFilter
 {
-    [self setBlocksDelegateIfNotSet];
     [(CLLocationManagerBlocks *)self.blocksDelegate setUpdateLocationAgeFilter:updateLocationAgeFilter];
 }
 
@@ -498,19 +479,19 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
 
 - (void)setAuthorizationDescription:(CLLocationUpdateAuthorizationDescription)authorizationDescription
 {
-    [self setBlocksDelegateIfNotSet];
     [(CLLocationManagerBlocks *)self.blocksDelegate setAuthorizationDescription:authorizationDescription];
 }
 
 
 #pragma mark - Class Delegate
 
-- (void)setBlocksDelegateIfNotSet
+- (id)setBlocksDelegate
 {
-    if (!self.blocksDelegate) {
-        self.blocksDelegate = [[CLLocationManagerBlocks alloc] init];
-        [self setDelegate:self.blocksDelegate];
-    }
+    id blocksDelegate = [[CLLocationManagerBlocks alloc] init];
+    [self setDelegate:blocksDelegate];
+    
+    objc_setAssociatedObject(self, CLLocationManagerBlocksDelegateKey, blocksDelegate, OBJC_ASSOCIATION_RETAIN);
+    return blocksDelegate;
 }
 
 @end
