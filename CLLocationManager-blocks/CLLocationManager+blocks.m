@@ -36,16 +36,24 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
 @property (nonatomic, assign) CLUpdateAccuracyFilter updateAccuracyFilter;
 @property (nonatomic, assign) CLLocationAgeFilter updateLocationAgeFilter;
 
-@property (nonatomic, copy) DidUpdateLocationsBlock didUpdateLocationsBlock;
-@property (nonatomic, copy) DidUpdateHeadingBlock didUpdateHeadingBlock;
 @property (nonatomic, copy) LocationManagerUpdateBlock updateBlock;
 @property (nonatomic, copy) HeadingUpdateBlock headingUpdateBlock;
-@property (nonatomic, copy) DidChangeAuthorizationStatusBlock didChangeAuthorizationStatusBlock;
+
+@property (nonatomic, copy) DidUpdateLocationsBlock didUpdateLocationsBlock;
+@property (nonatomic, copy) DidUpdateHeadingBlock didUpdateHeadingBlock;
+@property (nonatomic, copy) ShouldDisplayHeadingCalibrationBlock shouldDisplayCalibrationBlock;
+@property (nonatomic, copy) DidDetermineStateBlock didDetermineStateBlock;
+@property (nonatomic, copy) DidRangeBeaconsBlock didRangeBeaconsBlock;
+@property (nonatomic, copy) RangingBeaconsDidFailForRegionBlock rangingBeaconsDidFailForRegionBlock;
 @property (nonatomic, copy) DidEnterRegionBlock didEnterRegionBlock;
 @property (nonatomic, copy) DidExitRegionBlock didExitRegionBlock;
+@property (nonatomic, copy) DidFailWithErrorBlock didFailWithErrorBlock;
 @property (nonatomic, copy) MonitoringDidFailForRegionWithBlock monitoringDidFailForRegionWithBlock;
+@property (nonatomic, copy) DidChangeAuthorizationStatusBlock didChangeAuthorizationStatusBlock;
 @property (nonatomic, copy) DidStartMonitoringForRegionWithBlock didStartMonitoringForRegionWithBlock;
-@property (nonatomic, copy) ShouldDisplayCalibrationBlock shouldDisplayCalibrationBlock;
+@property (nonatomic, copy) LocationManagerDidPauseLocationUpdatesBlock locationManagerDidPauseLocationUpdatesBlock;
+@property (nonatomic, copy) LocationManagerDidResumeLocationUpdatesBlock locationManagerDidResumeLocationUpdatesBlock;
+@property (nonatomic, copy) DidFinishDeferredUpdatesWithErrorBlock didFinishDeferredUpdatesWithErrorBlock;
 
 @end
 
@@ -126,63 +134,6 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
     }
 }
 
-- (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error
-{
-    LocationManagerUpdateBlock updateBlock = self.updateBlock;
-    
-    if (updateBlock) {
-        __block BOOL stopUpdates = NO;
-        updateBlock(manager, nil, error, &stopUpdates);
-        
-        if (stopUpdates) {
-            [manager stopUpdatingLocation];
-            self.updateBlock = nil;
-        }
-    }
-}
-
-- (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status
-{
-    DidChangeAuthorizationStatusBlock didChangeAuthorizationStatusBlock = self.didChangeAuthorizationStatusBlock;
-    
-	if (didChangeAuthorizationStatusBlock) {
-        didChangeAuthorizationStatusBlock(manager, status);
-    }
-}
-
-- (void)locationManager:(CLLocationManager *)manager didEnterRegion:(CLRegion *)region
-{
-	DidEnterRegionBlock didEnterRegionBlock = self.didEnterRegionBlock;
-    
-    if (didEnterRegionBlock) {
-        didEnterRegionBlock(manager, region);
-    }
-}
-
-- (void)locationManager:(CLLocationManager *)manager didExitRegion:(CLRegion *)region
-{
-	DidExitRegionBlock didExitRegionBlock = self.didExitRegionBlock;
-    if (didExitRegionBlock) {
-        didExitRegionBlock(manager, region);
-    }
-}
-
-- (void)locationManager:(CLLocationManager *)manager monitoringDidFailForRegion:(CLRegion *)region withError:(NSError *)error
-{
-	MonitoringDidFailForRegionWithBlock monitoringDidFailForRegionWithBlock = self.monitoringDidFailForRegionWithBlock;
-    if (monitoringDidFailForRegionWithBlock) {
-        monitoringDidFailForRegionWithBlock(manager, region, error);
-    }
-}
-
-- (void)locationManager:(CLLocationManager *)manager didStartMonitoringForRegion:(CLRegion *)region
-{
-	DidStartMonitoringForRegionWithBlock didStartMonitoringForRegionWithBlock = self.didStartMonitoringForRegionWithBlock;
-    if (didStartMonitoringForRegionWithBlock) {
-        didStartMonitoringForRegionWithBlock(manager, region);
-    }
-}
-
 - (void)locationManager:(CLLocationManager *)manager didUpdateHeading:(CLHeading *)newHeading
 {
     DidUpdateHeadingBlock didUpdateHeadingBlock = self.didUpdateHeadingBlock;
@@ -204,21 +155,118 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
 
 - (BOOL)locationManagerShouldDisplayHeadingCalibration:(CLLocationManager *)manager
 {
-    ShouldDisplayCalibrationBlock shouldDisplayCalibrationBlock = self.shouldDisplayCalibrationBlock;
+    ShouldDisplayHeadingCalibrationBlock shouldDisplayCalibrationBlock = self.shouldDisplayCalibrationBlock;
     if (shouldDisplayCalibrationBlock) {
         return shouldDisplayCalibrationBlock(manager);
+    } else {
+        return NO;
     }
-    else return NO;
 }
 
-// TODO: (AD) Implement these methods if required.
-/*
+- (void)locationManager:(CLLocationManager *)manager didDetermineState:(CLRegionState)state forRegion:(CLRegion *)region
+{
+    DidDetermineStateBlock didDetermineStateBlock = self.didDetermineStateBlock;
+    if (didDetermineStateBlock) {
+        didDetermineStateBlock(manager, state, region);
+    }
+}
+
+- (void)locationManager:(CLLocationManager *)manager didRangeBeacons:(NSArray *)beacons inRegion:(CLBeaconRegion *)region
+{
+    DidRangeBeaconsBlock didRangeBeaconsBlock = self.didRangeBeaconsBlock;
+    if (didRangeBeaconsBlock) {
+        didRangeBeaconsBlock(manager, beacons, region);
+    }
+}
+
+- (void)locationManager:(CLLocationManager *)manager rangingBeaconsDidFailForRegion:(CLBeaconRegion *)region withError:(NSError *)error
+{
+    RangingBeaconsDidFailForRegionBlock rangingBeaconsDidFailForRegionBlock = self.rangingBeaconsDidFailForRegionBlock;
+    if (rangingBeaconsDidFailForRegionBlock) {
+        rangingBeaconsDidFailForRegionBlock(manager, region, error);
+    }
+}
+
+- (void)locationManager:(CLLocationManager *)manager didEnterRegion:(CLRegion *)region
+{
+	DidEnterRegionBlock didEnterRegionBlock = self.didEnterRegionBlock;
+    
+    if (didEnterRegionBlock) {
+        didEnterRegionBlock(manager, region);
+    }
+}
+
+- (void)locationManager:(CLLocationManager *)manager didExitRegion:(CLRegion *)region
+{
+	DidExitRegionBlock didExitRegionBlock = self.didExitRegionBlock;
+    if (didExitRegionBlock) {
+        didExitRegionBlock(manager, region);
+    }
+}
+
+- (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error
+{
+    LocationManagerUpdateBlock updateBlock = self.updateBlock;
+    DidFailWithErrorBlock didFailWithErrorBlock = self.didFailWithErrorBlock;
+    
+    if (didFailWithErrorBlock) {
+        didFailWithErrorBlock(manager, error);
+    }
+    
+    if (updateBlock) {
+        __block BOOL stopUpdates = NO;
+        updateBlock(manager, nil, error, &stopUpdates);
+        
+        if (stopUpdates) {
+            [manager stopUpdatingLocation];
+            self.updateBlock = nil;
+        }
+    }
+}
+
+- (void)locationManager:(CLLocationManager *)manager monitoringDidFailForRegion:(CLRegion *)region withError:(NSError *)error
+{
+	MonitoringDidFailForRegionWithBlock monitoringDidFailForRegionWithBlock = self.monitoringDidFailForRegionWithBlock;
+    if (monitoringDidFailForRegionWithBlock) {
+        monitoringDidFailForRegionWithBlock(manager, region, error);
+    }
+}
+
+- (void)locationManager:(CLLocationManager *)manager didStartMonitoringForRegion:(CLRegion *)region
+{
+	DidStartMonitoringForRegionWithBlock didStartMonitoringForRegionWithBlock = self.didStartMonitoringForRegionWithBlock;
+    if (didStartMonitoringForRegionWithBlock) {
+        didStartMonitoringForRegionWithBlock(manager, region);
+    }
+}
+
 - (void)locationManagerDidPauseLocationUpdates:(CLLocationManager *)manager
 {
-    
+    LocationManagerDidPauseLocationUpdatesBlock locationManagerDidPauseLocationUpdatesBlock = self.locationManagerDidPauseLocationUpdatesBlock;
+    if (locationManagerDidPauseLocationUpdatesBlock) {
+        locationManagerDidPauseLocationUpdatesBlock(manager);
+    }
 }
 
 - (void)locationManagerDidResumeLocationUpdates:(CLLocationManager *)manager
+{
+    LocationManagerDidResumeLocationUpdatesBlock locationManagerDidResumeLocationUpdatesBlock = self.locationManagerDidResumeLocationUpdatesBlock;
+    if (locationManagerDidResumeLocationUpdatesBlock) {
+        locationManagerDidResumeLocationUpdatesBlock(manager);
+    }
+}
+
+- (void)locationManager:(CLLocationManager *)manager didFinishDeferredUpdatesWithError:(NSError *)error
+{
+    DidFinishDeferredUpdatesWithErrorBlock didFinishDeferredUpdatesWithErrorBlock = self.didFinishDeferredUpdatesWithErrorBlock;
+    if (didFinishDeferredUpdatesWithErrorBlock) {
+        didFinishDeferredUpdatesWithErrorBlock(manager, error);
+    }
+}
+
+@end
+
+
 {
     
 }
@@ -242,10 +290,34 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
     [(CLLocationManagerBlocks *)self.blocksDelegate setDidUpdateLocationsBlock:block];
 }
 
-- (void)didChangeAuthorizationStatusWithBlock:(DidChangeAuthorizationStatusBlock)block
+- (void)didUpdateHeadingWithBock:(DidUpdateHeadingBlock)block
 {
     [self setBlocksDelegateIfNotSet];
-    [(CLLocationManagerBlocks *)self.blocksDelegate setDidChangeAuthorizationStatusBlock:block];
+    [(CLLocationManagerBlocks *)self.blocksDelegate setDidUpdateHeadingBlock:block];
+}
+
+- (void)shouldDisplayHeadingCalibrationWithBlock:(ShouldDisplayHeadingCalibrationBlock)block
+{
+    [self setBlocksDelegateIfNotSet];
+    [(CLLocationManagerBlocks *)self.blocksDelegate setShouldDisplayCalibrationBlock:block];
+}
+
+- (void)didDetermineStateWithBlock:(DidDetermineStateBlock)block
+{
+    [self setBlocksDelegateIfNotSet];
+    [(CLLocationManagerBlocks *)self.blocksDelegate setDidDetermineStateBlock:block];
+}
+
+- (void)didRangeBeaconsWithBlock:(DidRangeBeaconsBlock)block
+{
+    [self setBlocksDelegateIfNotSet];
+    [(CLLocationManagerBlocks *)self.blocksDelegate setDidRangeBeaconsBlock:block];
+}
+
+- (void)rangingBeaconsDidFailForRegionWithBlock:(RangingBeaconsDidFailForRegionBlock)block
+{
+    [self setBlocksDelegateIfNotSet];
+    [(CLLocationManagerBlocks *)self.blocksDelegate setRangingBeaconsDidFailForRegionBlock:block];
 }
 
 - (void)didEnterRegionWithBlock:(DidEnterRegionBlock)block
@@ -260,10 +332,22 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
     [(CLLocationManagerBlocks *)self.blocksDelegate setDidExitRegionBlock:block];
 }
 
+- (void)didFailWithErrorWithBlock:(DidFailWithErrorBlock)block
+{
+    [self setBlocksDelegateIfNotSet];
+    [(CLLocationManagerBlocks *)self.blocksDelegate setDidFailWithErrorBlock:block];
+}
+
 - (void)monitoringDidFailForRegionWithBlock:(MonitoringDidFailForRegionWithBlock)block
 {
     [self setBlocksDelegateIfNotSet];
     [(CLLocationManagerBlocks *)self.blocksDelegate setMonitoringDidFailForRegionWithBlock:block];
+}
+
+- (void)didChangeAuthorizationStatusWithBlock:(DidChangeAuthorizationStatusBlock)block
+{
+    [self setBlocksDelegateIfNotSet];
+    [(CLLocationManagerBlocks *)self.blocksDelegate setDidChangeAuthorizationStatusBlock:block];
 }
 
 - (void)didStartMonitoringForRegionWithBlock:(DidStartMonitoringForRegionWithBlock)block
@@ -272,18 +356,25 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
     [(CLLocationManagerBlocks *)self.blocksDelegate setDidStartMonitoringForRegionWithBlock:block];
 }
 
-- (void)startUpdatingLocationWithUpdateBlock:(LocationManagerUpdateBlock)updateBlock
+- (void)locationManagerDidPauseLocationUpdatesWithBlock:(LocationManagerDidPauseLocationUpdatesBlock)block
 {
     [self setBlocksDelegateIfNotSet];
-    [(CLLocationManagerBlocks *)self.blocksDelegate setUpdateBlock:updateBlock];
-    
-    [self startUpdatingLocation];
+    [(CLLocationManagerBlocks *)self.blocksDelegate setLocationManagerDidPauseLocationUpdatesBlock:block];
 }
 
-- (void)didUpdateHeadingWithBock:(DidUpdateHeadingBlock)block
+- (void)locationManagerDidResumeLocationUpdatesWithBlock:(LocationManagerDidResumeLocationUpdatesBlock)block
 {
     [self setBlocksDelegateIfNotSet];
-    [(CLLocationManagerBlocks *)self.blocksDelegate setDidUpdateHeadingBlock:block];
+    [(CLLocationManagerBlocks *)self.blocksDelegate setLocationManagerDidResumeLocationUpdatesBlock:block];
+}
+
+- (void)didFinishDeferredUpdatesWithErrorWithBlock:(DidFinishDeferredUpdatesWithErrorBlock)block
+{
+    [self setBlocksDelegateIfNotSet];
+    [(CLLocationManagerBlocks *)self.blocksDelegate setDidFinishDeferredUpdatesWithErrorBlock:block];
+}
+
+
 }
 
 - (void)startUpdatingHeadingWithUpdateBlock:(HeadingUpdateBlock)updateBlock

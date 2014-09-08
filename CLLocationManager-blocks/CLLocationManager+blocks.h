@@ -118,9 +118,45 @@ typedef void (^DidUpdateLocationsBlock)(CLLocationManager *manager, NSArray *loc
 typedef void(^DidUpdateHeadingBlock)(CLLocationManager *manager, CLHeading *heading);
 
 /**
+ Block used to notify about location errors
+ */
+typedef void (^DidFailWithErrorBlock)(CLLocationManager *manager, NSError *error);
+
+/**
  Block used to confirm if calibration should be displayed
  */
-typedef BOOL(^ShouldDisplayCalibrationBlock)(CLLocationManager *manager);
+typedef BOOL(^ShouldDisplayHeadingCalibrationBlock)(CLLocationManager *manager);
+
+/**
+ Block used to notify about a state transition for a monitored region
+ */
+typedef void(^DidDetermineStateBlock)(CLLocationManager *manager, CLRegionState state, CLRegion *region);
+
+/**
+ Block used to notify about beacon in region updates
+ */
+typedef void(^DidRangeBeaconsBlock)(CLLocationManager *manager, NSArray *beacons, CLBeaconRegion *region);
+
+/**
+ Block used to notify about beacon in region failing updates
+ */
+typedef void(^RangingBeaconsDidFailForRegionBlock)(CLLocationManager *manager, CLBeaconRegion *region, NSError *error);
+
+/**
+ Block used to notify about location updates paused
+ */
+typedef void(^LocationManagerDidPauseLocationUpdatesBlock)(CLLocationManager *manager);
+
+/**
+ Block used to notify about location updates resumed
+ */
+typedef void(^LocationManagerDidResumeLocationUpdatesBlock)(CLLocationManager *manager);
+
+/**
+ Block used to notify about location updates will no longer be delivered
+ */
+typedef void(^DidFinishDeferredUpdatesWithErrorBlock)(CLLocationManager *manager, NSError *error);
+
 
 ///-------------------
 /// @name Helper class
@@ -187,15 +223,42 @@ typedef BOOL(^ShouldDisplayCalibrationBlock)(CLLocationManager *manager);
 - (void)didUpdateLocationsWithBlock:(DidUpdateLocationsBlock)block;
 
 /**
- Replacement for the didChangeAuthorizationStatus: delegate method
+ Replacement for the didUpdateHeading: delegate method
  
  @param block The block replacing delegate method
  */
-- (void)didChangeAuthorizationStatusWithBlock:(DidChangeAuthorizationStatusBlock)block;
+- (void)didUpdateHeadingWithBock:(DidUpdateHeadingBlock)block;
+
+/**
+ Replacement for the shouldDisplayCalibrationBlock: delegate methods
+ 
+ @param block The block replacing delegate method
+ */
+- (void)shouldDisplayHeadingCalibrationWithBlock:(ShouldDisplayHeadingCalibrationBlock)block;
+
+/**
+ Replacement for the didDetermineStateWithBlock: delegate method
+ 
+ @param block The block replacing delegate method
+ */
+- (void)didDetermineStateWithBlock:(DidDetermineStateBlock)block;
+
+/**
+ Replacement for the didRangeBeaconsWithBlock: delegate method
+ 
+ @param block The block replacing delegate method
+ */
+- (void)didRangeBeaconsWithBlock:(DidRangeBeaconsBlock)block;
+
+/**
+ Replacement for the rangingBeaconsDidFailForRegionWithBlock: delegate method
+ 
+ @param block The block replacing delegate method
+ */
+- (void)rangingBeaconsDidFailForRegionWithBlock:(RangingBeaconsDidFailForRegionBlock)block;
 
 /**
  Replacement for the didEnterRegion: delegate method
- 
  
  @param block The block replacing delegate method
  */
@@ -209,6 +272,13 @@ typedef BOOL(^ShouldDisplayCalibrationBlock)(CLLocationManager *manager);
 - (void)didExitRegionWithBlock:(DidExitRegionBlock)block;
 
 /**
+ Replacement for the didFailWithError: delegate method
+ 
+ @param block The block replacing delegate method
+ */
+- (void)didFailWithErrorWithBlock:(DidFailWithErrorBlock)block;
+
+/**
  Replacement for the monitoringDidFailForRegion: delegate method
  
  @param block The block replacing delegate method
@@ -216,25 +286,40 @@ typedef BOOL(^ShouldDisplayCalibrationBlock)(CLLocationManager *manager);
 - (void)monitoringDidFailForRegionWithBlock:(MonitoringDidFailForRegionWithBlock)block;
 
 /**
+ Replacement for the didChangeAuthorizationStatus: delegate method
+ 
+ @param block The block replacing delegate method
+ */
+- (void)didChangeAuthorizationStatusWithBlock:(DidChangeAuthorizationStatusBlock)block;
+
+/**
  Replacement for the didStartMonitoringForRegion: delegate method
  
- @param block The block replacing delegate method 
+ @param block The block replacing delegate method
  */
 - (void)didStartMonitoringForRegionWithBlock:(DidStartMonitoringForRegionWithBlock)block;
 
 /**
- Replacement for the didUpdateHeading: delegate method
+ Replacement for the locationManagerDidPauseLocationUpdatesWithBlock: delegate method
  
  @param block The block replacing delegate method
  */
-- (void)didUpdateHeadingWithBock:(DidUpdateHeadingBlock)block;
+- (void)locationManagerDidPauseLocationUpdatesWithBlock:(LocationManagerDidPauseLocationUpdatesBlock)block;
 
 /**
- Replacement for the shouldDisplayCalibrationBlock: delegate methods
+ Replacement for the locationManagerDidResumeLocationUpdatesWithBlock: delegate method
  
  @param block The block replacing delegate method
  */
-- (void)shouldDisplayHeadingCalibrationWithBlock:(ShouldDisplayCalibrationBlock)block;
+- (void)locationManagerDidResumeLocationUpdatesWithBlock:(LocationManagerDidResumeLocationUpdatesBlock)block;
+
+/**
+ Replacement for the didFinishDeferredUpdatesWithErrorWithBlock: delegate method
+ 
+ @param block The block replacing delegate method
+ */
+- (void)didFinishDeferredUpdatesWithErrorWithBlock:(DidFinishDeferredUpdatesWithErrorBlock)block;
+
 
 ///-------------------------------------
 /// @name Additional methods with blocks
