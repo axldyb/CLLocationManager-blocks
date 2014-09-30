@@ -441,7 +441,9 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
     CLAuthorizationStatus status = [CLLocationManager authorizationStatus];
     
     if ([CLLocationManager instancesRespondToSelector:@selector(requestWhenInUseAuthorization)]) {
-        NSAssert([[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSLocationAlwaysUsageDescription"], @"NSLocationAlwaysUsageDescription key not present in the info.plist. Please add it in order to recieve location updates");
+        NSString *alwaysDescription = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSLocationAlwaysUsageDescription"];
+        NSString *whenInUseDescription = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSLocationWhenInUseUsageDescription"];
+        NSAssert([alwaysDescription length] || [whenInUseDescription length], @"NSLocationAlwaysUsageDescription or NSLocationWhenInUseUsageDescription key not present in the info.plist. Please add it in order to recieve location updates");
     }
     
     switch (status) {
