@@ -1,5 +1,7 @@
 #CLLocationManager-blocks
-A category on CLLocationManager adding blocks plus some new functionality.
+A category on CLLocationManager adding blocks plus some new functionality. 
+
+__NOTE:__ Supporting iOS 8 from version 1.3.0.
 
 ## Installation
 CLLocationManager-block is available through [CocoaPods](http://cocoapods.org), to install
@@ -12,14 +14,14 @@ pod 'CLLocationManager-blocks'
 ##Usage
 This category provides location updates in two ways.
 
-* Custom update block
-* Block implementation of the basic CLLocationManagerDelegate methods
+* Custom update blocks for location and heading
+* Block implementation of the CLLocationManagerDelegate methods
 
-##Custom block for recieving updates
+##Block for recieving updates
 Recieving location updates in a block.
 
 ```objective-c
-self.manager = [[CLLocationManager alloc] init]; 
+self.manager = [CLLocationManager updateManagerWithAccuracy:50.0 locationAge:15.0 authorizationDesciption:CLLocationUpdateAuthorizationDescriptionAlways];
 [self.manager startUpdatingLocationWithUpdateBlock:^(CLLocationManager *manager, CLLocation *location, NSError *error, BOOL *stopUpdating) {
     NSLog(@"Our new location: %@", location);
 }]; 
@@ -36,20 +38,33 @@ You can set the `stopUpdating` boolean to `YES` stop location updates at any suc
 *stopUpdating = YES; 
 ```
 
-##Additional parameters
+A similar method exist for recieving heading updates:
 
-In addition to the blocks two new parameters are added
+```objective-c
+[self.manager startUpdatingHeadingWithUpdateBlock:^(CLLocationManager *manager, CLHeading *heading, NSError *error, BOOL *stopUpdating) {
+    NSLog(@"Our new heading: %@", heading);
+    *stopUpdating = YES;
+}];
+```
+
+##Authorization Description
+
+New to iOS 8 is the need for the key `NSLocationAlwaysUsageDescription` to be set in the info.plist. Make sure you add this. 
+
+##Filters
+
+In addition to the blocks two new filters is included. Normally when you are listening for location updates you will recieve location updates with undesired age og accuracy. One would then have to write code to avoid the usage of these updates. Thanks to the new filters we just have to specify the an age and/or accuracy to get a location update we can work with.
 
 ####updateAccuracyFilter
 
-The standard `[CLLocationManager desiredAccuracy]` cannot garantie that the provided accuracy requrements are meet. By setting this parameter all updates with a higher inaccuracy than specified are excluded.
+The standard `[CLLocationManager desiredAccuracy]` provided in Core Location cannot garantie that specific accuracy requrements are meet. By setting this parameter all updates with a higher inaccuracy than specified are excluded.
 
 * Unless you are running updates for a long period, set the `[CLLocationManager desiredAccuracy]` to `kCLLocationAccuracyBest` and your desired `updateAccuracyFilter` specified in meters. 
 * `updateAccuracyFilter` is used for all blocks. 
 * Default is set to `kCLUpdateAccuracyFilterNone`.
 
 ####updateLocationAgeFilter
-This parameter is set to filter out location updates older than the specified value in seconds. CLLocationManager location updates may provide old updates for different reasons and this is a good way to get a fresh plot.
+This parameter is set to filter out location updates older than the specified value in seconds. CLLocationManager location updates may provide old updates for different reasons and this is a good way to get a fresh update.
 
 * Default is set to `kCLLocationAgeFilterNone`
 
@@ -57,59 +72,26 @@ This parameter is set to filter out location updates older than the specified va
 ```objective-c
 self.manager.updateAccuracyFilter = 50.0;
 self.manager.updateLocationAgeFilter = 15.0;
+//or
+self.manager.updateAccuracyFilter = kCLUpdateAccuracyFilterNone;
+self.manager.updateLocationAgeFilter = kCLLocationAgeFilterNone;
 ```
 ##Blocks
 
-The category contains block implementations of the basic CLLocationManagerDelegate methods
+The category contains block implementations of all CLLocationManagerDelegate methods. These blocks can be used together with CLLocationManager just as you normally would have used the delegate. 
 
 __NOTE:__ Unlike the startUpdatingLocationWithUpdateBlock: you will have to call startUpdatingLocation to recieve updates.
+
+####Example
 
 ***locationManager:didUpdateLocations:***
 
 ```objective-c
+self.manager = [CLLocationManager updateManager];
 [self.manager didUpdateLocationsWithBlock:^(CLLocationManager *manager, NSArray *locations) {
 	// Did update locations
 }];
-```
-
-***locationManager:didChangeAuthorizationStatus:***
-
-```objective-c
-[self.manager didChangeAuthorizationStatusWithBlock:^(CLLocationManager *manager, CLAuthorizationStatus status) { 
-	// Did change authorization status       
-}];
-```
-
-***locationManager:didEnterRegion:***
-
-```objective-c
-[self.manager didEnterRegionWithBlock:^(CLLocationManager *manager, CLRegion *region) {
-	// Did enter region
-}]
-```
-
-***locationManager:didExitRegion:***
-
-```objective-c
-[self.manager didExitRegionWithBlock:^(CLLocationManager *manager, CLRegion *region) {
-	// Did exit region       
-}]
-```
-
-***locationManager:monitoringDidFailForRegion:***
-
-```objective-c
-[self.manager monitoringDidFailForRegionWithBlock:^(CLLocationManager *manager, CLRegion *region, NSError *error) {
-	// Monitoring did fail for region        
-}]
-```
-
-***locationManager:didStartMonitoringForRegion:***
-
-```objective-c
-[self.manager didStartMonitoringForRegionWithBlock:^(CLLocationManager *manager, CLRegion *region) {
-	// Did start monitoring for region        
-}]
+[self.manager startUpdatingLocation];
 ```
 
 ##Convenience methods
@@ -117,8 +99,7 @@ Method to ease the steps to state if location updates is authorized by the user.
 
 ***isLocationUpdatesAvailable***
 
-```
-
+```objective-c
 if ([CLLocationManager isLocationUpdatesAvailable]) {
 	// Location updates authorized
 }
