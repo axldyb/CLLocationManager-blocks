@@ -303,7 +303,7 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
 
 + (instancetype)updateManagerWithAccuracy:(CLUpdateAccuracyFilter)updateAccuracyFilter locationAge:(CLLocationAgeFilter)updateLocationAgeFilter;
 {
-    CLLocationManager *manger = [[CLLocationManager alloc] init];
+    CLLocationManager *manger = [CLLocationManager updateManager];
     manger.updateAccuracyFilter = updateAccuracyFilter;
     manger.updateLocationAgeFilter = updateLocationAgeFilter;
     return manger;
