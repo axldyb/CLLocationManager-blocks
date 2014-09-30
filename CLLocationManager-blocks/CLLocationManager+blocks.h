@@ -55,6 +55,9 @@ extern const CLLocationAgeFilter kCLLocationAgeFilterNone;
 /// @name Authorization Description
 ///--------------------------------
 
+/**
+ Enum used to specify the authorization description
+ */
 typedef NS_ENUM(NSUInteger, CLLocationUpdateAuthorizationDescription) {
     CLLocationUpdateAuthorizationDescriptionAlways,
     CLLocationUpdateAuthorizationDescriptionWhenInUse,
@@ -253,6 +256,7 @@ typedef void(^DidVisitBLock)(CLLocationManager *manager, CLVisit *visit);
  
  @param updateAccuracyFilter The update accuracy filter
  @param updateLocationAgeFilter The location age filter
+ @param authorizationDescription The authorization description
  
  @return CLLocationManager instance
  */
@@ -268,7 +272,7 @@ typedef void(^DidVisitBLock)(CLLocationManager *manager, CLVisit *visit);
  Note that location updates will start automatically when calling this method.
  To stop location updates, simply set the *stopUpdating param to YES.
  
- param updateBlock The block used for location updates.
+ @param updateBlock The block used for location updates.
  */
 - (void)startUpdatingLocationWithUpdateBlock:(LocationManagerUpdateBlock)updateBlock;
 
@@ -277,7 +281,7 @@ typedef void(^DidVisitBLock)(CLLocationManager *manager, CLVisit *visit);
  but it does notify about heading updates instead of locations.
  To stop updates, simply set the *stopUpdating param to YES.
  
- param updateBlock The block used for heading updates.
+ @param updateBlock The block used for heading updates.
  */
 - (void)startUpdatingHeadingWithUpdateBlock:(HeadingUpdateBlock)updateBlock;
 
