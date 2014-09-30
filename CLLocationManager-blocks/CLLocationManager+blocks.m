@@ -440,6 +440,10 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
 {
     CLAuthorizationStatus status = [CLLocationManager authorizationStatus];
     
+    if ([CLLocationManager instancesRespondToSelector:@selector(requestWhenInUseAuthorization)]) {
+        NSAssert([[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSLocationAlwaysUsageDescription"], @"NSLocationAlwaysUsageDescription key not present in the info.plist. Please add it in order to recieve location updates");
+    }
+    
     switch (status) {
         case kCLAuthorizationStatusAuthorizedAlways:
         case kCLAuthorizationStatusAuthorizedWhenInUse:
