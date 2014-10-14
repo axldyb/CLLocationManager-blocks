@@ -423,6 +423,7 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
 
 - (void)requestAuthorization
 {
+#if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= 80000
     if ([self respondsToSelector:@selector(requestWhenInUseAuthorization)]) {
         CLLocationUpdateAuthorizationDescription description = [self authorizationDescription];
         if (description == CLLocationUpdateAuthorizationDescriptionWhenInUse) {
@@ -431,6 +432,7 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
             [self requestAlwaysAuthorization];
         }
     }
+#endif
 }
 
 
@@ -446,6 +448,7 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
         NSAssert([alwaysDescription length] || [whenInUseDescription length], @"NSLocationAlwaysUsageDescription or NSLocationWhenInUseUsageDescription key not present in the info.plist. Please add it in order to recieve location updates");
     }
     
+#if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= 80000
     switch (status) {
         case kCLAuthorizationStatusAuthorizedAlways:
         case kCLAuthorizationStatusAuthorizedWhenInUse:
@@ -458,6 +461,19 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
             return NO;
             break;
     }
+#else
+    switch (status) {
+        case kCLAuthorizationStatusAuthorized:
+        case kCLAuthorizationStatusNotDetermined:
+            return YES;
+            break;
+        case kCLAuthorizationStatusDenied:
+        case kCLAuthorizationStatusRestricted:
+        default:
+            return NO;
+            break;
+    }
+#endif
 }
 
 

@@ -51,6 +51,16 @@ extern const CLUpdateAccuracyFilter kCLUpdateAccuracyFilterNone;
 extern const CLLocationAgeFilter kCLLocationAgeFilterNone;
 
 
+///--------------------
+/// @name iOS 7 Support
+///--------------------
+
+/**
+ CLVisit referenced for compilation with iOS 7 sdk.
+ */
+@class CLVisit;
+
+
 ///--------------------------------
 /// @name Authorization Description
 ///--------------------------------
@@ -173,7 +183,7 @@ typedef void(^DidFinishDeferredUpdatesWithErrorBlock)(CLLocationManager *manager
 /**
  Block used to notify about new visit-related events
  */
-typedef void(^DidVisitBLock)(CLLocationManager *manager, CLVisit *visit);
+typedef void(^DidVisitBLock)(CLLocationManager *manager, CLVisit *visit) NS_AVAILABLE_IOS(8_0);
 
 
 ///-------------------
@@ -317,28 +327,28 @@ typedef void(^DidVisitBLock)(CLLocationManager *manager, CLVisit *visit);
 - (void)didUpdateHeadingWithBock:(DidUpdateHeadingBlock)block;
 
 /**
- Replacement for the shouldDisplayCalibrationBlock: delegate methods
+ Replacement for the shouldDisplayCalibration: delegate methods
  
  @param block The block replacing delegate method
  */
 - (void)shouldDisplayHeadingCalibrationWithBlock:(ShouldDisplayHeadingCalibrationBlock)block;
 
 /**
- Replacement for the didDetermineStateWithBlock: delegate method
+ Replacement for the didDetermineState: delegate method
  
  @param block The block replacing delegate method
  */
 - (void)didDetermineStateWithBlock:(DidDetermineStateBlock)block;
 
 /**
- Replacement for the didRangeBeaconsWithBlock: delegate method
+ Replacement for the didRangeBeacons: delegate method
  
  @param block The block replacing delegate method
  */
 - (void)didRangeBeaconsWithBlock:(DidRangeBeaconsBlock)block;
 
 /**
- Replacement for the rangingBeaconsDidFailForRegionWithBlock: delegate method
+ Replacement for the rangingBeaconsDidFailForRegion: delegate method
  
  @param block The block replacing delegate method
  */
@@ -387,14 +397,14 @@ typedef void(^DidVisitBLock)(CLLocationManager *manager, CLVisit *visit);
 - (void)didStartMonitoringForRegionWithBlock:(DidStartMonitoringForRegionWithBlock)block;
 
 /**
- Replacement for the locationManagerDidPauseLocationUpdatesWithBlock: delegate method
+ Replacement for the locationManagerDidPauseLocationUpdates: delegate method
  
  @param block The block replacing delegate method
  */
 - (void)locationManagerDidPauseLocationUpdatesWithBlock:(LocationManagerDidPauseLocationUpdatesBlock)block;
 
 /**
- Replacement for the locationManagerDidResumeLocationUpdatesWithBlock: delegate method
+ Replacement for the locationManagerDidResumeLocationUpdates: delegate method
  
  @param block The block replacing delegate method
  */
@@ -406,5 +416,12 @@ typedef void(^DidVisitBLock)(CLLocationManager *manager, CLVisit *visit);
  @param block The block replacing delegate method
  */
 - (void)didFinishDeferredUpdatesWithErrorWithBlock:(DidFinishDeferredUpdatesWithErrorBlock)block;
+
+/**
+ Replacement for the didVisit: delegate method
+ 
+ @param block The block replacing delegate method
+ */
+- (void)didVisitWithBlock:(DidVisitBLock)block NS_AVAILABLE_IOS(8_0);
 
 @end
