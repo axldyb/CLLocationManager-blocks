@@ -1,11 +1,11 @@
 Pod::Spec.new do |s|
   s.name     = 'CLLocationManager-blocks'
-  s.version  = '1.3.1'
+  s.version  = '1.3.2'
   s.license  = 'MIT'
   s.summary  = 'A category on CLLocationManager adding blocks to basic delegate methods. It also adds some nifty features for simplyfying location updates.'
   s.homepage = 'https://github.com/axldyb/CLLocationManager-blocks'
   s.authors  = { 'Aksel Dybdal' => 'akseldybdal@gmail.com' }
-  s.source   = { :git => 'https://github.com/axldyb/CLLocationManager-blocks.git', :tag => '1.3.1' }
+  s.source   = { :git => 'https://github.com/axldyb/CLLocationManager-blocks.git', :tag => '1.3.2' }
   s.source_files = 'CLLocationManager-blocks'
   s.requires_arc = true
 
