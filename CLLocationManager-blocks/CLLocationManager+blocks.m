@@ -111,11 +111,14 @@ CLLocationAgeFilter const kCLLocationAgeFilterNone = 0.0;
         }
         
         // Location age filtering
-        NSDate *eventDate = loc.timestamp;
-        NSTimeInterval howRecent = [eventDate timeIntervalSinceNow];
-        if (fabs(howRecent) > self.updateLocationAgeFilter) {
-            continue;
+        if (self.updateLocationAgeFilter != kCLLocationAgeFilterNone) {
+            NSDate *eventDate = loc.timestamp;
+            NSTimeInterval howRecent = [eventDate timeIntervalSinceNow];
+            if (isless(fabs(howRecent), self.updateLocationAgeFilter) == 0) {
+                continue;
+            }
         }
+        
         
         [filteredLocationsMutable addObject:loc];
         
