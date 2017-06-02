@@ -1,4 +1,4 @@
-#CLLocationManager-blocks
+# CLLocationManager-blocks
 A category on CLLocationManager adding blocks plus some new functionality. 
 
 __NOTE:__ Supporting iOS 8 from version 1.3.0.
@@ -11,13 +11,13 @@ it simply add the following line to your Podfile:
 pod 'CLLocationManager-blocks'
 ```
 
-##Usage
+## Usage
 This category provides location updates in two ways.
 
 * Custom update blocks for location and heading
 * Block implementation of the CLLocationManagerDelegate methods
 
-##Block for recieving updates
+## Block for recieving updates
 Recieving location updates in a block.
 
 ```objective-c
@@ -47,15 +47,15 @@ A similar method exist for recieving heading updates:
 }];
 ```
 
-##Authorization Description
+## Authorization Description
 
 New to iOS 8 is the need for the key `NSLocationAlwaysUsageDescription` to be set in the info.plist. Make sure you add this. 
 
-##Filters
+## Filters
 
 In addition to the blocks two new filters is included. Normally when you are listening for location updates you will recieve location updates with undesired age og accuracy. One would then have to write code to avoid the usage of these updates. Thanks to the new filters we just have to specify the an age and/or accuracy to get a location update we can work with.
 
-####updateAccuracyFilter
+#### updateAccuracyFilter
 
 The standard `[CLLocationManager desiredAccuracy]` provided in Core Location cannot garantie that specific accuracy requrements are meet. By setting this parameter all updates with a higher inaccuracy than specified are excluded.
 
@@ -63,12 +63,12 @@ The standard `[CLLocationManager desiredAccuracy]` provided in Core Location can
 * `updateAccuracyFilter` is used for all blocks. 
 * Default is set to `kCLUpdateAccuracyFilterNone`.
 
-####updateLocationAgeFilter
+#### updateLocationAgeFilter
 This parameter is set to filter out location updates older than the specified value in seconds. CLLocationManager location updates may provide old updates for different reasons and this is a good way to get a fresh update.
 
 * Default is set to `kCLLocationAgeFilterNone`
 
-####Example
+#### Example
 ```objective-c
 self.manager.updateAccuracyFilter = 50.0;
 self.manager.updateLocationAgeFilter = 15.0;
@@ -76,13 +76,13 @@ self.manager.updateLocationAgeFilter = 15.0;
 self.manager.updateAccuracyFilter = kCLUpdateAccuracyFilterNone;
 self.manager.updateLocationAgeFilter = kCLLocationAgeFilterNone;
 ```
-##Blocks
+## Blocks
 
 The category contains block implementations of all CLLocationManagerDelegate methods. These blocks can be used together with CLLocationManager just as you normally would have used the delegate. 
 
 __NOTE:__ Unlike the startUpdatingLocationWithUpdateBlock: you will have to call startUpdatingLocation to recieve updates.
 
-####Example
+#### Example
 
 ***locationManager:didUpdateLocations:***
 
@@ -94,7 +94,7 @@ self.manager = [CLLocationManager updateManager];
 [self.manager startUpdatingLocation];
 ```
 
-##Convenience methods
+## Convenience methods
 Method to ease the steps to state if location updates is authorized by the user.
 
 ***isLocationUpdatesAvailable***
@@ -105,7 +105,7 @@ if ([CLLocationManager isLocationUpdatesAvailable]) {
 }
 ```
 
-##License
+## License
 
 See the LICENSE file
 
